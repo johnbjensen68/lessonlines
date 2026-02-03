@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 LessonLines is a web application for K-12 teachers to create historical timelines. It combines a timeline builder with a curated database of historical events aligned to curriculum standards (Common Core, AP US History, Texas TEKS).
 
-**Status:** Specification phase - all design docs are complete in `/specs/`, implementation has not started.
+**Status:** Implementation in progress - design docs in `/specs/`, core backend and frontend implemented.
 
 ## Architecture
 
@@ -85,6 +85,11 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 - `useTimeline` - Timeline state management with auto-save (1s debounce)
 - `useEvents` - Event database queries
 - `useDragDrop` - @dnd-kit integration for drag-and-drop
+
+## Git Conventions
+
+- Do not include mentions of Claude or AI in commit messages
+- Use conventional commit style (e.g., "Add user authentication", "Fix bcrypt compatibility")
 
 ## Important Implementation Notes
 
