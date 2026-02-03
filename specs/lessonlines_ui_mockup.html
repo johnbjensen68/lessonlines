@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Builder - UI Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        
+        /* Header */
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: #3498db;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .btn-secondary {
+            background: #4a6278;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        /* Main Layout */
+        .main {
+            display: flex;
+            height: calc(100vh - 52px);
+        }
+        
+        /* Left Sidebar - Event Database */
+        .sidebar {
+            width: 320px;
+            background: white;
+            border-right: 1px solid #e1e8ed;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #3498db;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+        
+        .topic-tabs {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .topic-tab {
+            padding: 6px 12px;
+            background: #ecf0f1;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .topic-tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        /* Event List */
+        .event-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        
+        .event-card {
+            background: #f8fafc;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+        
+        .event-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+        }
+        
+        .event-card.dragging {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+        
+        .event-date {
+            font-size: 11px;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 4px;
+        }
+        
+        .event-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .event-desc {
+            font-size: 12px;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+        
+        .drag-hint {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #95a5a6;
+            margin-top: 8px;
+        }
+        
+        /* Main Canvas Area */
+        .canvas-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Toolbar */
+        .toolbar {
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toolbar-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+        
+        .toolbar-divider {
+            width: 1px;
+            height: 24px;
+            background: #e1e8ed;
+        }
+        
+        .color-options {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .color-swatch.active {
+            border-color: #2c3e50;
+        }
+        
+        .layout-options {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .layout-btn {
+            padding: 6px 12px;
+            border: 1px solid #e1e8ed;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .layout-btn.active {
+            border-color: #3498db;
+            background: #ebf5fb;
+            color: #3498db;
+        }
+        
+        .font-select {
+            padding: 6px 10px;
+            border: 1px solid #e1e8ed;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+        
+        .toolbar-spacer {
+            flex: 1;
+        }
+        
+        .export-btn {
+            padding: 8px 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .pro-badge {
+            background: #f39c12;
+            color: white;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        /* Main Canvas */
+        .canvas {
+            flex: 1;
+            padding: 24px;
+            overflow: auto;
+        }
+        
+        .timeline-title-input {
+            font-size: 28px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            width: 100%;
+            margin-bottom: 8px;
+            outline: none;
+        }
+        
+        .timeline-subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 32px;
+        }
+        
+        /* Timeline */
+        .timeline-container {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            min-height: 400px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 2px;
+        }
+        
+        .timeline-events {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .timeline-event {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 160px;
+        }
+        
+        .timeline-event:nth-child(even) {
+            flex-direction: column-reverse;
+        }
+        
+        .event-dot {
+            width: 16px;
+            height: 16px;
+            background: #3498db;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            z-index: 1;
+        }
+        
+        .event-connector {
+            width: 2px;
+            height: 40px;
+            background: #e1e8ed;
+        }
+        
+        .event-content {
+            background: #f8fafc;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            max-width: 160px;
+        }
+        
+        .event-content-date {
+            font-size: 11px;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 4px;
+        }
+        
+        .event-content-title {
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #95a5a6;
+            margin-top: 24px;
+        }
+        
+        .drop-zone-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <circle cx="6" cy="12" r="2"></circle>
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <circle cx="18" cy="12" r="2"></circle>
+                </svg>
+            </div>
+            HistoryLine
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary">My Timelines</button>
+            <button class="btn btn-primary">+ New Timeline</button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Left Sidebar - Event Database -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Event Database</div>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search events..." value="civil war">
+                </div>
+                <div class="topic-tabs">
+                    <span class="topic-tab active">Civil War</span>
+                    <span class="topic-tab">Am. Revolution</span>
+                    <span class="topic-tab">WWII</span>
+                    <span class="topic-tab">Civil Rights</span>
+                </div>
+            </div>
+            <div class="event-list">
+                <div class="event-card">
+                    <div class="event-date">April 12, 1861</div>
+                    <div class="event-title">Attack on Fort Sumter</div>
+                    <div class="event-desc">Confederate forces bombard Fort Sumter in Charleston Harbor, beginning the Civil War.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">July 21, 1861</div>
+                    <div class="event-title">First Battle of Bull Run</div>
+                    <div class="event-desc">First major land battle of the war ends in Confederate victory near Manassas, Virginia.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">September 17, 1862</div>
+                    <div class="event-title">Battle of Antietam</div>
+                    <div class="event-desc">Bloodiest single-day battle in American history with nearly 23,000 casualties.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">January 1, 1863</div>
+                    <div class="event-title">Emancipation Proclamation</div>
+                    <div class="event-desc">Lincoln declares all slaves in Confederate states to be free.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">July 1-3, 1863</div>
+                    <div class="event-title">Battle of Gettysburg</div>
+                    <div class="event-desc">Turning point of the war; Union victory ends Lee's invasion of the North.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+                <div class="event-card">
+                    <div class="event-date">April 9, 1865</div>
+                    <div class="event-title">Lee Surrenders at Appomattox</div>
+                    <div class="event-desc">General Robert E. Lee surrenders to Ulysses S. Grant, effectively ending the war.</div>
+                    <div class="drag-hint">⋮⋮ Drag to timeline</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Canvas Wrapper with Toolbar -->
+        <div class="canvas-wrapper">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Color</span>
+                    <div class="color-options">
+                        <div class="color-swatch active" style="background: linear-gradient(90deg, #3498db, #2ecc71);"></div>
+                        <div class="color-swatch" style="background: linear-gradient(90deg, #e74c3c, #f39c12);"></div>
+                        <div class="color-swatch" style="background: linear-gradient(90deg, #9b59b6, #3498db);"></div>
+                        <div class="color-swatch" style="background: #34495e;"></div>
+                    </div>
+                </div>
+                
+                <div class="toolbar-divider"></div>
+                
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Layout</span>
+                    <div class="layout-options">
+                        <button class="layout-btn active">Horizontal</button>
+                        <button class="layout-btn">Vertical</button>
+                    </div>
+                </div>
+                
+                <div class="toolbar-divider"></div>
+                
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Font</span>
+                    <select class="font-select">
+                        <option>System Default</option>
+                        <option>Serif</option>
+                        <option>Rounded</option>
+                    </select>
+                </div>
+                
+                <div class="toolbar-spacer"></div>
+                
+                <button class="export-btn">
+                    📄 Export PDF
+                    <span class="pro-badge">PRO</span>
+                </button>
+            </div>
+            
+            <!-- Main Canvas -->
+            <section class="canvas">
+                <input type="text" class="timeline-title-input" value="The American Civil War">
+                <div class="timeline-subtitle">Key events from 1861-1865</div>
+                
+                <div class="timeline-container">
+                    <div class="timeline">
+                        <div class="timeline-line"></div>
+                        <div class="timeline-events">
+                            <div class="timeline-event">
+                                <div class="event-content">
+                                    <div class="event-content-date">Apr 1861</div>
+                                    <div class="event-content-title">Attack on Fort Sumter</div>
+                                </div>
+                                <div class="event-connector"></div>
+                                <div class="event-dot"></div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-dot"></div>
+                                <div class="event-connector"></div>
+                                <div class="event-content">
+                                    <div class="event-content-date">Sep 1862</div>
+                                    <div class="event-content-title">Battle of Antietam</div>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-content">
+                                    <div class="event-content-date">Jan 1863</div>
+                                    <div class="event-content-title">Emancipation Proclamation</div>
+                                </div>
+                                <div class="event-connector"></div>
+                                <div class="event-dot"></div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-dot"></div>
+                                <div class="event-connector"></div>
+                                <div class="event-content">
+                                    <div class="event-content-date">Jul 1863</div>
+                                    <div class="event-content-title">Battle of Gettysburg</div>
+                                </div>
+                            </div>
+                            <div class="timeline-event">
+                                <div class="event-content">
+                                    <div class="event-content-date">Apr 1865</div>
+                                    <div class="event-content-title">Lee Surrenders</div>
+                                </div>
+                                <div class="event-connector"></div>
+                                <div class="event-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="drop-zone">
+                        <div class="drop-zone-icon">📥</div>
+                        <div>Drag events here to add them to your timeline</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
