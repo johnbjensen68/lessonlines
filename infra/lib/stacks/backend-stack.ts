@@ -57,21 +57,26 @@ export class BackendStack extends cdk.Stack {
           local: {
             tryBundle(outputDir: string) {
               // Fallback for local synthesis without Docker
-              // Just copy source files - actual deployment should use Docker or CI
               const { execSync, spawnSync } = require('child_process');
 
-              // Try pip3 or pip for local bundling
-              const pipCmd = spawnSync('pip3', ['--version'], { stdio: 'ignore' }).status === 0
-                ? 'pip3'
-                : spawnSync('pip', ['--version'], { stdio: 'ignore' }).status === 0
-                  ? 'pip'
-                  : null;
-
-              if (pipCmd) {
-                execSync(`${pipCmd} install -r ${backendPath}/requirements-lambda.txt -t ${outputDir} --quiet`, {
-                  stdio: 'inherit',
-                });
+              // Try pip3, pip, or python3 -m pip for local bundling
+              let pipCmd: string | null = null;
+              if (spawnSync('pip3', ['--version'], { stdio: 'ignore' }).status === 0) {
+                pipCmd = 'pip3';
+              } else if (spawnSync('pip', ['--version'], { stdio: 'ignore' }).status === 0) {
+                pipCmd = 'pip';
+              } else if (spawnSync('python3', ['-m', 'pip', '--version'], { stdio: 'ignore' }).status === 0) {
+                pipCmd = 'python3 -m pip';
               }
+
+              if (!pipCmd) {
+                console.error('ERROR: No pip found. Cannot bundle Lambda dependencies.');
+                return false; // Fall back to Docker bundling
+              }
+
+              execSync(`${pipCmd} install -r ${backendPath}/requirements-lambda.txt -t ${outputDir} --quiet`, {
+                stdio: 'inherit',
+              });
               // Copy only runtime source files
               execSync(`cp -r ${backendPath}/app ${backendPath}/handler.py ${outputDir}/`, { stdio: 'inherit' });
               // Strip unnecessary files
