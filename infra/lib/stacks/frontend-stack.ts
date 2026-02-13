@@ -52,6 +52,18 @@ export class FrontendStack extends cdk.Stack {
           ]),
         },
       ],
+      customRules: [
+        {
+          source: '/api/<*>',
+          target: `${apiUrl}/api/<*>`,
+          status: '200',
+        },
+        {
+          source: '</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|woff2|ttf|map|json|webp)$)([^.]+$)/>',
+          target: '/index.html',
+          status: '200',
+        },
+      ],
       buildSpec: cdk.Fn.sub(`version: 1
 frontend:
   phases:
