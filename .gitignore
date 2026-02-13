@@ -38,6 +38,7 @@ yarn-error.log*
 # Build output
 frontend/dist/
 backend/.aws-sam/
+infra/cdk.out/
 
 # OS
 .DS_Store
