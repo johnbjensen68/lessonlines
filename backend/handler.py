@@ -5,6 +5,7 @@ Uses Mangum to adapt FastAPI for AWS Lambda.
 Supports two modes:
 - API requests: routed to FastAPI via Mangum (default)
 - Migrations: triggered with {"action": "migrate"} payload
+- Seed: triggered with {"action": "seed"} payload
 """
 import json
 import os
@@ -105,6 +106,22 @@ def handler(event, context):
                     "revision": revision,
                     "error": str(e),
                 },
+            }
+
+    if isinstance(event, dict) and event.get("action") == "seed":
+        logger.info("Running database seed")
+        try:
+            from app.seed import run_seed
+            run_seed()
+            return {
+                "statusCode": 200,
+                "body": {"success": True, "action": "seed"},
+            }
+        except Exception as e:
+            logger.exception("Seed failed")
+            return {
+                "statusCode": 500,
+                "body": {"success": False, "action": "seed", "error": str(e)},
             }
 
     # Default: route to FastAPI via Mangum
