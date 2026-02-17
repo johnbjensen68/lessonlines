@@ -6,9 +6,10 @@ import { EventListItem } from '../../types';
 
 interface EventDatabaseProps {
   onAddEvent?: (event: EventListItem) => void;
+  excludeEventIds?: Set<string>;
 }
 
-export default function EventDatabase({ onAddEvent }: EventDatabaseProps) {
+export default function EventDatabase({ onAddEvent, excludeEventIds }: EventDatabaseProps) {
   const {
     events,
     topics,
@@ -35,7 +36,11 @@ export default function EventDatabase({ onAddEvent }: EventDatabaseProps) {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-3">
-        <EventList events={events} isLoading={isLoading} onAddEvent={onAddEvent} />
+        <EventList
+          events={excludeEventIds ? events.filter((e) => !excludeEventIds.has(e.id)) : events}
+          isLoading={isLoading}
+          onAddEvent={onAddEvent}
+        />
       </div>
     </aside>
   );

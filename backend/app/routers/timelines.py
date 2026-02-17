@@ -237,15 +237,21 @@ def remove_event_from_timeline(
         raise HTTPException(status_code=404, detail="Event not found at this position")
 
     db.delete(timeline_event)
+    db.flush()
 
-    # Reorder remaining events
+    # Reorder remaining events: shift to temporary negatives first to avoid conflicts
     remaining_events = db.query(TimelineEvent).filter(
         TimelineEvent.timeline_id == timeline_id,
         TimelineEvent.position > position
     ).order_by(TimelineEvent.position).all()
 
     for event in remaining_events:
-        event.position -= 1
+        event.position = -(event.position)
+
+    db.flush()
+
+    for event in remaining_events:
+        event.position = -(event.position) - 1
 
     db.commit()
 
@@ -274,14 +280,22 @@ def reorder_timeline_events(
     if not timeline:
         raise HTTPException(status_code=404, detail="Timeline not found")
 
-    # Update positions based on the order in the request
+    # Set positions to temporary negatives to avoid unique constraint conflicts
+    events_to_reorder = []
     for new_position, event_id in enumerate(data.positions):
         timeline_event = db.query(TimelineEvent).filter(
             TimelineEvent.timeline_id == timeline_id,
             TimelineEvent.id == event_id
         ).first()
         if timeline_event:
-            timeline_event.position = new_position
+            timeline_event.position = -(new_position + 1)
+            events_to_reorder.append((timeline_event, new_position))
+
+    db.flush()
+
+    # Now set the real positions
+    for timeline_event, new_position in events_to_reorder:
+        timeline_event.position = new_position
 
     db.commit()
 

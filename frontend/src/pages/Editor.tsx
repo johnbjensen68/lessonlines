@@ -125,7 +125,10 @@ export default function Editor() {
         onDragEnd={handleDragEnd}
       >
         <div className="flex flex-1 overflow-hidden">
-          <EventDatabase onAddEvent={handleAddEvent} />
+          <EventDatabase
+            onAddEvent={handleAddEvent}
+            excludeEventIds={new Set(timeline.events.map((e) => e.event_id).filter(Boolean) as string[])}
+          />
           <TimelineCanvas
             timeline={timeline}
             onTitleChange={(title) => update({ title })}
