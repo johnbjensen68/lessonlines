@@ -98,3 +98,9 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 - Full-text search uses PostgreSQL `to_tsvector` (no Elasticsearch needed)
 - Events should align to multiple curriculum standards where appropriate
 - UI mockup reference: `specs/lessonlines_ui_mockup.html`
+
+## git wotkflow
+
+Make all changes in fresh PRs.
+Don't mention claude in the PR descriptions
+
