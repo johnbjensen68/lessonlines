@@ -147,10 +147,6 @@ aws lambda invoke --function-name lessonlines-dev-api \
 curl https://5rbw7mcz8k.execute-api.us-east-1.amazonaws.com/api/topics
 ```
 
-## Code Review
-
-All pull requests are automatically reviewed by Claude via the [Claude Code GitHub Action](https://github.com/anthropics/claude-code-action). Reviews run on PR open and on each new push.
-
 ## API Endpoints
 
 - `GET /api/events` - Search curated events (filters: topic, keyword, standard, tag, grade)
