@@ -6,12 +6,17 @@ interface TimelineEventProps {
   event: TimelineEventType;
   index: number;
   colorPrimary: string;
+  colorSecondary: string;
+  axisColor: string;
   onRemove: () => void;
 }
 
 export default function TimelineEvent({
   event,
+  index,
   colorPrimary,
+  colorSecondary,
+  axisColor,
   onRemove,
 }: TimelineEventProps) {
   const {
@@ -31,6 +36,13 @@ export default function TimelineEvent({
   const title = event.custom_title || event.event?.title || 'Custom Event';
   const dateDisplay = event.custom_date_display || event.event?.date_display || '';
 
+  // Alternate between primary and secondary colors like the reference
+  const cardColor = index % 2 === 0 ? colorPrimary : colorSecondary;
+
+  // Stagger heights: cycle through 3 levels to create the layered look
+  const level = index % 3;
+  const connectorHeight = level === 0 ? 'h-24' : level === 1 ? 'h-12' : 'h-40';
+
   return (
     <div
       ref={setNodeRef}
@@ -39,8 +51,8 @@ export default function TimelineEvent({
     >
       {/* Event card */}
       <div
-        className="bg-white rounded-lg shadow-md w-[180px] p-3 relative group cursor-grab active:cursor-grabbing"
-        style={{ borderTop: `3px solid ${colorPrimary}` }}
+        className="rounded w-[170px] px-3 py-2.5 relative group cursor-grab active:cursor-grabbing shadow-lg"
+        style={{ backgroundColor: cardColor }}
         {...attributes}
         {...listeners}
       >
@@ -49,22 +61,33 @@ export default function TimelineEvent({
             e.stopPropagation();
             onRemove();
           }}
-          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow"
         >
           x
         </button>
-        <div className="text-sm font-semibold text-slate-800 leading-tight">{title}</div>
-        <div className="text-xs mt-1" style={{ color: colorPrimary }}>{dateDisplay}</div>
+        <div className="text-sm font-bold text-white leading-tight">{title}</div>
+        <div className="text-xs mt-1 text-white/80">{dateDisplay}</div>
       </div>
 
       {/* Connector line */}
-      <div className="w-px h-8 bg-slate-300"></div>
+      <div
+        className={`w-0.5 ${connectorHeight}`}
+        style={{ backgroundColor: cardColor }}
+      ></div>
 
       {/* Dot on axis */}
       <div
-        className="w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 shrink-0"
-        style={{ backgroundColor: colorPrimary }}
+        className="w-3.5 h-3.5 rounded-full z-10 shrink-0 border-2"
+        style={{ backgroundColor: axisColor, borderColor: axisColor }}
       ></div>
+
+      {/* Tick mark below dot */}
+      <div className="w-px h-2" style={{ backgroundColor: axisColor }}></div>
+
+      {/* Date label on axis */}
+      <div className="mt-0.5 text-center w-[170px]">
+        <span className="text-[11px] font-medium text-slate-300">{dateDisplay}</span>
+      </div>
     </div>
   );
 }

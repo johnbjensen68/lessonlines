@@ -37,22 +37,24 @@ export default function TimelineCanvas({
         placeholder="Add a subtitle..."
       />
 
-      <div className="bg-white rounded-xl p-8 shadow-sm min-h-[400px]">
+      <div className="bg-slate-800 rounded-xl shadow-sm min-h-[400px] overflow-hidden">
         {sortedEvents.length > 0 ? (
-          <div className="overflow-x-auto">
-            <div className="relative pb-2">
+          <div className="overflow-x-auto p-6">
+            <div className="relative">
               <TimelineLine gradient={colorScheme.gradient} />
               <SortableContext
                 items={sortedEvents.map((e) => e.id)}
                 strategy={horizontalListSortingStrategy}
               >
-                <div className="flex gap-4 items-end px-2 pb-0">
+                <div className="flex gap-3 items-end px-2">
                   {sortedEvents.map((event, index) => (
                     <TimelineEvent
                       key={event.id}
                       event={event}
                       index={index}
                       colorPrimary={colorScheme.primary}
+                      colorSecondary={colorScheme.secondary}
+                      axisColor={colorScheme.secondary}
                       onRemove={() => onRemoveEvent(event.position)}
                     />
                   ))}
