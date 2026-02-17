@@ -9,6 +9,13 @@ export default function EventCard({ event, onAdd }: EventCardProps) {
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 transition-all hover:border-primary-300 hover:shadow-sm">
       <div className="flex items-start justify-between gap-2">
+        {event.image_url && (
+          <img
+            src={event.image_url}
+            alt={event.title}
+            className="shrink-0 w-14 h-14 rounded object-cover bg-slate-200"
+          />
+        )}
         <div className="flex-1 min-w-0">
           <div className="text-xs font-semibold text-primary-500 mb-1">{event.date_display}</div>
           <div className="text-sm font-medium text-slate-800 mb-1">{event.title}</div>

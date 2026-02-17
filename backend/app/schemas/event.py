@@ -40,6 +40,7 @@ class EventListResponse(BaseModel):
     description: str
     date_display: str
     location: Optional[str] = None
+    image_url: Optional[str] = None
     tags: list[TagResponse] = []
 
     class Config:

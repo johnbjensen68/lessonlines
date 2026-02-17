@@ -35,6 +35,7 @@ export default function TimelineEvent({
 
   const title = event.custom_title || event.event?.title || 'Custom Event';
   const dateDisplay = event.custom_date_display || event.event?.date_display || '';
+  const imageUrl = event.event?.image_url || null;
 
   // Alternate between primary and secondary colors like the reference
   const cardColor = index % 2 === 0 ? colorPrimary : colorSecondary;
@@ -65,6 +66,13 @@ export default function TimelineEvent({
         >
           x
         </button>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={title}
+            className="w-full h-20 object-cover rounded-sm mb-1.5"
+          />
+        )}
         <div className="text-sm font-bold text-white leading-tight">{title}</div>
         <div className="text-xs mt-1 text-white/80">{dateDisplay}</div>
       </div>
