@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   DndContext,
-  DragOverlay,
-  DragStartEvent,
   DragEndEvent,
   closestCenter,
   PointerSensor,
@@ -13,7 +10,7 @@ import {
 import { arrayMove } from '@dnd-kit/sortable';
 import { Header } from '../components/layout';
 import { Toolbar } from '../components/toolbar';
-import { EventDatabase, EventCard } from '../components/sidebar';
+import { EventDatabase } from '../components/sidebar';
 import { TimelineCanvas } from '../components/timeline';
 import { useTimeline } from '../hooks/useTimeline';
 import { useAuth } from '../context/AuthContext';
@@ -24,8 +21,6 @@ export default function Editor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeEvent, setActiveEvent] = useState<EventListItem | null>(null);
-  const [isDropOverZone, setIsDropOverZone] = useState(false);
 
   const {
     timeline,
@@ -50,6 +45,10 @@ export default function Editor() {
     }
   };
 
+  const handleAddEvent = async (event: EventListItem) => {
+    await addEvent({ event_id: event.id });
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -57,6 +56,19 @@ export default function Editor() {
       },
     })
   );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || !timeline) return;
+
+    const oldIndex = timeline.events.findIndex((e) => e.id === active.id);
+    const newIndex = timeline.events.findIndex((e) => e.id === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+      const reorderedEvents = arrayMove(timeline.events, oldIndex, newIndex);
+      await reorderEvents(reorderedEvents.map((e) => e.id));
+    }
+  };
 
   if (isLoading) {
     return (
@@ -81,46 +93,6 @@ export default function Editor() {
       </div>
     );
   }
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    if (active.id.toString().startsWith('event-')) {
-      setActiveEvent(active.data.current?.event);
-    }
-  };
-
-  const handleDragOver = (event: DragEndEvent) => {
-    const { over } = event;
-    setIsDropOverZone(over?.id === 'timeline-drop-zone');
-  };
-
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveEvent(null);
-    setIsDropOverZone(false);
-
-    if (!over) return;
-
-    // Adding event from sidebar to timeline
-    if (active.id.toString().startsWith('event-') && over.id === 'timeline-drop-zone') {
-      const eventData = active.data.current?.event as EventListItem;
-      if (eventData) {
-        await addEvent({ event_id: eventData.id });
-      }
-      return;
-    }
-
-    // Reordering events within timeline
-    if (!active.id.toString().startsWith('event-') && over.id !== 'timeline-drop-zone') {
-      const oldIndex = timeline.events.findIndex((e) => e.id === active.id);
-      const newIndex = timeline.events.findIndex((e) => e.id === over.id);
-
-      if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
-        const reorderedEvents = arrayMove(timeline.events, oldIndex, newIndex);
-        await reorderEvents(reorderedEvents.map((e) => e.id));
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100">
@@ -150,27 +122,17 @@ export default function Editor() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <div className="flex flex-1 overflow-hidden">
-          <EventDatabase />
+          <EventDatabase onAddEvent={handleAddEvent} />
           <TimelineCanvas
             timeline={timeline}
             onTitleChange={(title) => update({ title })}
             onSubtitleChange={(subtitle) => update({ subtitle })}
             onRemoveEvent={removeEvent}
-            isDropOver={isDropOverZone}
           />
         </div>
-        <DragOverlay>
-          {activeEvent ? (
-            <div className="opacity-80">
-              <EventCard event={activeEvent} isDragging />
-            </div>
-          ) : null}
-        </DragOverlay>
       </DndContext>
     </div>
   );
