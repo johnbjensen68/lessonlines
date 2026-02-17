@@ -2,8 +2,13 @@ import { useEvents } from '../../hooks/useEvents';
 import SearchInput from './SearchInput';
 import TopicTabs from './TopicTabs';
 import EventList from './EventList';
+import { EventListItem } from '../../types';
 
-export default function EventDatabase() {
+interface EventDatabaseProps {
+  onAddEvent?: (event: EventListItem) => void;
+}
+
+export default function EventDatabase({ onAddEvent }: EventDatabaseProps) {
   const {
     events,
     topics,
@@ -30,7 +35,7 @@ export default function EventDatabase() {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-3">
-        <EventList events={events} isLoading={isLoading} />
+        <EventList events={events} isLoading={isLoading} onAddEvent={onAddEvent} />
       </div>
     </aside>
   );

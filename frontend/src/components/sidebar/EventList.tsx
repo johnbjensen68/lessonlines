@@ -4,9 +4,10 @@ import { EventListItem } from '../../types';
 interface EventListProps {
   events: EventListItem[];
   isLoading: boolean;
+  onAddEvent?: (event: EventListItem) => void;
 }
 
-export default function EventList({ events, isLoading }: EventListProps) {
+export default function EventList({ events, isLoading, onAddEvent }: EventListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -26,7 +27,11 @@ export default function EventList({ events, isLoading }: EventListProps) {
   return (
     <div className="space-y-2">
       {events.map((event) => (
-        <EventCard key={event.id} event={event} />
+        <EventCard
+          key={event.id}
+          event={event}
+          onAdd={onAddEvent ? () => onAddEvent(event) : undefined}
+        />
       ))}
     </div>
   );

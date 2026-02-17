@@ -1,7 +1,6 @@
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import TimelineEvent from './TimelineEvent';
 import TimelineLine from './TimelineLine';
-import DropZone from './DropZone';
 import { Timeline } from '../../types';
 import { COLOR_SCHEMES } from '../../utils/constants';
 
@@ -10,7 +9,6 @@ interface TimelineCanvasProps {
   onTitleChange: (title: string) => void;
   onSubtitleChange: (subtitle: string) => void;
   onRemoveEvent: (position: number) => void;
-  isDropOver?: boolean;
 }
 
 export default function TimelineCanvas({
@@ -18,7 +16,6 @@ export default function TimelineCanvas({
   onTitleChange,
   onSubtitleChange,
   onRemoveEvent,
-  isDropOver,
 }: TimelineCanvasProps) {
   const colorScheme = COLOR_SCHEMES[timeline.color_scheme as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue_green;
   const sortedEvents = [...timeline.events].sort((a, b) => a.position - b.position);
@@ -42,30 +39,32 @@ export default function TimelineCanvas({
 
       <div className="bg-white rounded-xl p-8 shadow-sm min-h-[400px]">
         {sortedEvents.length > 0 ? (
-          <div className="relative py-5">
-            <TimelineLine gradient={colorScheme.gradient} />
-            <SortableContext
-              items={sortedEvents.map((e) => e.id)}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="flex justify-between items-center relative">
-                {sortedEvents.map((event, index) => (
-                  <TimelineEvent
-                    key={event.id}
-                    event={event}
-                    index={index}
-                    colorPrimary={colorScheme.primary}
-                    onRemove={() => onRemoveEvent(event.position)}
-                  />
-                ))}
-              </div>
-            </SortableContext>
+          <div className="overflow-x-auto">
+            <div className="relative pb-2">
+              <TimelineLine gradient={colorScheme.gradient} />
+              <SortableContext
+                items={sortedEvents.map((e) => e.id)}
+                strategy={horizontalListSortingStrategy}
+              >
+                <div className="flex gap-4 items-end px-2 pb-0">
+                  {sortedEvents.map((event, index) => (
+                    <TimelineEvent
+                      key={event.id}
+                      event={event}
+                      index={index}
+                      colorPrimary={colorScheme.primary}
+                      onRemove={() => onRemoveEvent(event.position)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </div>
           </div>
-        ) : null}
-
-        <div className={sortedEvents.length > 0 ? 'mt-6' : ''}>
-          <DropZone isOver={isDropOver} />
-        </div>
+        ) : (
+          <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
+            Add events from the sidebar to get started
+          </div>
+        )}
       </div>
     </div>
   );
