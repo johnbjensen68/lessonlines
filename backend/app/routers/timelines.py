@@ -186,15 +186,44 @@ def add_event_to_timeline(
     if not timeline:
         raise HTTPException(status_code=404, detail="Timeline not found")
 
-    # Get the next position
-    max_position = db.query(TimelineEvent).filter(
+    # Determine the date for the new event
+    new_date = data.custom_date_start
+    if not new_date and data.event_id:
+        curated_event = db.query(Event).filter(Event.id == data.event_id).first()
+        if curated_event:
+            new_date = curated_event.date_start
+
+    # Get existing events sorted by position
+    existing_events = db.query(TimelineEvent).filter(
         TimelineEvent.timeline_id == timeline_id
-    ).count()
+    ).order_by(TimelineEvent.position).all()
+
+    # Find the correct insertion position based on date
+    insert_position = len(existing_events)
+    if new_date:
+        for te in existing_events:
+            te_date = te.custom_date_start
+            if not te_date and te.event_id:
+                te_event = db.query(Event).filter(Event.id == te.event_id).first()
+                if te_event:
+                    te_date = te_event.date_start
+            if te_date and new_date < te_date:
+                insert_position = te.position
+                break
+
+    # Shift events at or after insert_position to make room (use negative temporaries)
+    events_to_shift = [e for e in existing_events if e.position >= insert_position]
+    for e in events_to_shift:
+        e.position = -(e.position + 1)
+    db.flush()
+    for e in events_to_shift:
+        e.position = -(e.position) + 1
+    db.flush()
 
     timeline_event = TimelineEvent(
         timeline_id=timeline_id,
         event_id=data.event_id,
-        position=max_position,
+        position=insert_position,
         custom_title=data.custom_title,
         custom_description=data.custom_description,
         custom_date_display=data.custom_date_display,
