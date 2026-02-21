@@ -58,6 +58,17 @@ def get_current_user(
     return user
 
 
+def get_current_admin_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    return current_user
+
+
 def get_current_user_optional(
     token: Optional[str] = Depends(OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)),
     db: Session = Depends(get_db)

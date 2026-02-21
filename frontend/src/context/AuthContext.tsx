@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: '',
             display_name: null,
             is_pro: false,
+            is_admin: decoded.is_admin || false,
             pro_purchased_at: null,
             created_at: '',
           };
@@ -92,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         display_name: null,
         is_pro: false,
+        is_admin: decoded.is_admin || false,
         pro_purchased_at: null,
         created_at: '',
       };

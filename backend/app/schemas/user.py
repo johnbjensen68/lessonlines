@@ -20,6 +20,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: Optional[str] = None
     is_pro: bool
+    is_admin: bool = False
     pro_purchased_at: Optional[datetime] = None
     created_at: datetime
 

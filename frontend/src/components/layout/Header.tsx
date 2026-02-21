@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export default function Header({ showNewTimeline = false, onNewTimeline }: HeaderProps) {
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -31,6 +31,13 @@ export default function Header({ showNewTimeline = false, onNewTimeline }: Heade
       </Link>
 
       <div className="flex items-center gap-3">
+        {user?.is_admin && (
+          <Link to="/admin/review">
+            <Button variant="secondary" size="sm">
+              Admin
+            </Button>
+          </Link>
+        )}
         <Link to="/dashboard">
           <Button variant="secondary" size="sm">
             My Timelines

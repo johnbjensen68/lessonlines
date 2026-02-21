@@ -6,6 +6,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
+import AdminReview from './pages/AdminReview';
 
 function App() {
   const { isLoading } = useAuth();
@@ -37,6 +39,14 @@ function App() {
           <ProtectedRoute>
             <Editor />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/review"
+        element={
+          <AdminRoute>
+            <AdminReview />
+          </AdminRoute>
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

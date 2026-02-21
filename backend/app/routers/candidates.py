@@ -9,6 +9,7 @@ from ..database import get_db
 from ..models import (
     CandidateEvent,
     CandidateStatus,
+    Event,
     HarvestBatch,
     HarvestBatchStatus,
     Tag,
@@ -26,7 +27,8 @@ from ..schemas import (
     HarvestBatchUpdate,
     HarvestBatchResponse,
 )
-from ..services.auth import get_current_user
+from ..schemas.event import EventResponse
+from ..services.auth import get_current_user, get_current_admin_user
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -43,7 +45,7 @@ def list_candidates(
     q: Optional[str] = Query(None, description="Search query"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(CandidateEvent).options(
@@ -87,7 +89,7 @@ def list_candidates(
 @router.get("/candidates/{candidate_id}", response_model=CandidateEventDetail)
 def get_candidate(
     candidate_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     candidate = db.query(CandidateEvent).options(
@@ -131,7 +133,7 @@ def get_candidate(
 @router.post("/candidates", response_model=CandidateEventResponse, status_code=201)
 def create_candidate(
     data: CandidateEventCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     candidate = _create_candidate_from_data(data, db)
@@ -144,7 +146,7 @@ def create_candidate(
 @router.post("/candidates/batch", response_model=list[CandidateEventResponse], status_code=201)
 def create_candidates_batch(
     data: CandidateBatchCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     candidates = []
@@ -174,7 +176,7 @@ def create_candidates_batch(
 def review_candidate(
     candidate_id: UUID,
     data: CandidateEventUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     candidate = db.query(CandidateEvent).filter(CandidateEvent.id == candidate_id).first()
@@ -192,6 +194,82 @@ def review_candidate(
     return _candidate_to_response(candidate, db)
 
 
+@router.post("/candidates/{candidate_id}/promote", response_model=EventResponse)
+def promote_candidate(
+    candidate_id: UUID,
+    current_user: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db),
+):
+    candidate = db.query(CandidateEvent).options(
+        joinedload(CandidateEvent.tags),
+        joinedload(CandidateEvent.standards),
+    ).filter(CandidateEvent.id == candidate_id).first()
+
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate event not found")
+
+    if candidate.status == CandidateStatus.approved.value:
+        raise HTTPException(status_code=400, detail="Candidate already approved")
+
+    if candidate.existing_event_id:
+        # Update existing event
+        event = db.query(Event).filter(Event.id == candidate.existing_event_id).first()
+        if not event:
+            raise HTTPException(status_code=404, detail="Existing event not found")
+
+        event.topic_id = candidate.topic_id
+        event.title = candidate.title
+        event.description = candidate.description
+        event.date_start = candidate.date_start
+        event.date_end = candidate.date_end
+        event.date_display = candidate.date_display
+        event.date_precision = candidate.date_precision
+        event.location = candidate.location
+        event.latitude = candidate.latitude
+        event.longitude = candidate.longitude
+        event.significance = candidate.significance
+        event.source_url = candidate.source_url
+        event.source_citation = candidate.source_citation
+        event.image_url = candidate.image_url
+
+        if candidate.tags:
+            event.tags = list(candidate.tags)
+        if candidate.standards:
+            event.standards = list(candidate.standards)
+    else:
+        # Create new event
+        event = Event(
+            topic_id=candidate.topic_id,
+            title=candidate.title,
+            description=candidate.description,
+            date_start=candidate.date_start,
+            date_end=candidate.date_end,
+            date_display=candidate.date_display,
+            date_precision=candidate.date_precision,
+            location=candidate.location,
+            latitude=candidate.latitude,
+            longitude=candidate.longitude,
+            significance=candidate.significance,
+            source_url=candidate.source_url,
+            source_citation=candidate.source_citation,
+            image_url=candidate.image_url,
+        )
+        if candidate.tags:
+            event.tags = list(candidate.tags)
+        if candidate.standards:
+            event.standards = list(candidate.standards)
+        db.add(event)
+
+    # Mark candidate as approved
+    candidate.status = CandidateStatus.approved.value
+    candidate.reviewed_at = datetime.now(timezone.utc)
+    candidate.reviewed_by = current_user.id
+
+    db.commit()
+    db.refresh(event)
+    return event
+
+
 # --- Harvest Batch endpoints ---
 
 @router.get("/harvest-batches", response_model=list[HarvestBatchResponse])
@@ -200,7 +278,7 @@ def list_harvest_batches(
     status: Optional[str] = Query(None, description="Filter by status"),
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(HarvestBatch)
@@ -219,7 +297,7 @@ def list_harvest_batches(
 @router.post("/harvest-batches", response_model=HarvestBatchResponse, status_code=201)
 def create_harvest_batch(
     data: HarvestBatchCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     batch = HarvestBatch(
@@ -241,7 +319,7 @@ def create_harvest_batch(
 def update_harvest_batch(
     batch_id: UUID,
     data: HarvestBatchUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
     db: Session = Depends(get_db),
 ):
     batch = db.query(HarvestBatch).filter(HarvestBatch.id == batch_id).first()

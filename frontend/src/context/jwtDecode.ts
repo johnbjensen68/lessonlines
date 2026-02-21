@@ -2,6 +2,7 @@ interface JwtPayload {
   sub: string;
   exp?: number;
   iat?: number;
+  is_admin?: boolean;
 }
 
 export function jwtDecode(token: string): JwtPayload {

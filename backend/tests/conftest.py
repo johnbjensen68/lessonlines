@@ -116,6 +116,29 @@ def pro_auth_headers(pro_user):
 
 
 @pytest.fixture
+def admin_user(db):
+    """Create and return an admin user."""
+    user = User(
+        id=uuid.uuid4(),
+        email="admin@example.com",
+        hashed_password=get_password_hash("password123"),
+        display_name="Admin User",
+        is_admin=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@pytest.fixture
+def admin_auth_headers(admin_user):
+    """Return auth headers for the admin user."""
+    token = create_access_token(data={"sub": str(admin_user.id)})
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
 def other_user(db):
     """Create a second user for ownership tests."""
     user = User(

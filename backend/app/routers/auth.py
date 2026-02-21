@@ -54,7 +54,7 @@ def login(
         )
 
     access_token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user.id), "is_admin": user.is_admin},
         expires_delta=timedelta(minutes=settings.access_token_expire_minutes)
     )
 

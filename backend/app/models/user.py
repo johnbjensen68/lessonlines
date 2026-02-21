@@ -14,6 +14,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     display_name = Column(String(255))
     is_pro = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
     pro_purchased_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

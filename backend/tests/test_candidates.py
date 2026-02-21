@@ -5,7 +5,7 @@ from datetime import date
 class TestCandidateEventCRUD:
     """Test candidate event CRUD operations."""
 
-    def test_create_candidate_new_event(self, client, auth_headers, sample_topic):
+    def test_create_candidate_new_event(self, client, admin_auth_headers, sample_topic):
         """Create a new candidate event (no existing_event_id)."""
         response = client.post(
             "/api/admin/candidates",
@@ -19,7 +19,7 @@ class TestCandidateEventCRUD:
                 "location": "Manassas, VA",
                 "source_name": "Wikipedia",
             },
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 201
         data = response.json()
@@ -27,7 +27,7 @@ class TestCandidateEventCRUD:
         assert data["status"] == "pending"
         assert data["existing_event_id"] is None
 
-    def test_create_candidate_proposed_change(self, client, auth_headers, sample_topic, sample_event):
+    def test_create_candidate_proposed_change(self, client, admin_auth_headers, sample_topic, sample_event):
         """Create a candidate as a proposed change to an existing event."""
         response = client.post(
             "/api/admin/candidates",
@@ -40,14 +40,14 @@ class TestCandidateEventCRUD:
                 "date_precision": "day",
                 "existing_event_id": str(sample_event.id),
             },
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 201
         data = response.json()
         assert data["existing_event_id"] == str(sample_event.id)
 
     def test_create_candidate_with_tags_and_standards(
-        self, client, auth_headers, sample_topic, sample_tag, sample_standard
+        self, client, admin_auth_headers, sample_topic, sample_tag, sample_standard
     ):
         """Create a candidate with tag and standard associations."""
         response = client.post(
@@ -61,7 +61,7 @@ class TestCandidateEventCRUD:
                 "tag_ids": [str(sample_tag.id)],
                 "standard_ids": [str(sample_standard.id)],
             },
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 201
         data = response.json()
@@ -84,29 +84,34 @@ class TestCandidateEventCRUD:
         )
         assert response.status_code == 401
 
-    def test_list_candidates_default_pending(self, client, auth_headers, sample_candidate):
-        """List candidates defaults to pending status filter."""
+    def test_non_admin_gets_403(self, client, auth_headers, sample_topic):
+        """Non-admin user gets 403 on admin endpoints."""
         response = client.get("/api/admin/candidates", headers=auth_headers)
+        assert response.status_code == 403
+
+    def test_list_candidates_default_pending(self, client, admin_auth_headers, sample_candidate):
+        """List candidates defaults to pending status filter."""
+        response = client.get("/api/admin/candidates", headers=admin_auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 1
         assert all(c["status"] == "pending" for c in data)
 
-    def test_list_candidates_filter_by_topic(self, client, auth_headers, sample_candidate, sample_topic):
+    def test_list_candidates_filter_by_topic(self, client, admin_auth_headers, sample_candidate, sample_topic):
         """Filter candidates by topic slug."""
         response = client.get(
             f"/api/admin/candidates?topic={sample_topic.slug}",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 1
 
-    def test_list_candidates_filter_by_keyword(self, client, auth_headers, sample_candidate):
+    def test_list_candidates_filter_by_keyword(self, client, admin_auth_headers, sample_candidate):
         """Filter candidates by keyword search."""
         response = client.get(
             "/api/admin/candidates?q=Antietam",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -114,7 +119,7 @@ class TestCandidateEventCRUD:
         assert "Antietam" in data[0]["title"]
 
     def test_list_candidates_filter_has_existing_event(
-        self, client, auth_headers, sample_topic, sample_event, db
+        self, client, admin_auth_headers, sample_topic, sample_event, db
     ):
         """Filter candidates by whether they have an existing event."""
         from app.models import CandidateEvent, CandidateStatus
@@ -135,14 +140,14 @@ class TestCandidateEventCRUD:
 
         response = client.get(
             "/api/admin/candidates?has_existing_event=true",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 1
         assert all(c["existing_event_id"] is not None for c in data)
 
-    def test_list_candidates_pagination(self, client, auth_headers, sample_topic, db):
+    def test_list_candidates_pagination(self, client, admin_auth_headers, sample_topic, db):
         """Test limit and offset pagination."""
         from app.models import CandidateEvent, CandidateStatus
 
@@ -160,23 +165,23 @@ class TestCandidateEventCRUD:
 
         response = client.get(
             "/api/admin/candidates?limit=2&offset=0",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         assert len(response.json()) == 2
 
         response2 = client.get(
             "/api/admin/candidates?limit=2&offset=2",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response2.status_code == 200
         assert len(response2.json()) == 2
 
-    def test_get_candidate_detail(self, client, auth_headers, sample_candidate):
+    def test_get_candidate_detail(self, client, admin_auth_headers, sample_candidate):
         """Get a single candidate by ID."""
         response = client.get(
             f"/api/admin/candidates/{sample_candidate.id}",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -184,7 +189,7 @@ class TestCandidateEventCRUD:
         assert data["existing_event"] is None
 
     def test_get_candidate_detail_with_existing_event(
-        self, client, auth_headers, sample_topic, sample_event, db
+        self, client, admin_auth_headers, sample_topic, sample_event, db
     ):
         """Get candidate detail includes existing event for comparison."""
         from app.models import CandidateEvent, CandidateStatus
@@ -205,27 +210,27 @@ class TestCandidateEventCRUD:
 
         response = client.get(
             f"/api/admin/candidates/{candidate.id}",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["existing_event"] is not None
         assert data["existing_event"]["title"] == "Battle of Gettysburg"
 
-    def test_get_candidate_not_found(self, client, auth_headers):
+    def test_get_candidate_not_found(self, client, admin_auth_headers):
         """Get non-existent candidate returns 404."""
         response = client.get(
             f"/api/admin/candidates/{uuid.uuid4()}",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 404
 
-    def test_approve_candidate(self, client, auth_headers, sample_candidate):
+    def test_approve_candidate(self, client, admin_auth_headers, sample_candidate):
         """Approve a candidate sets review metadata."""
         response = client.patch(
             f"/api/admin/candidates/{sample_candidate.id}",
             json={"status": "approved", "review_notes": "Looks good"},
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -234,12 +239,12 @@ class TestCandidateEventCRUD:
         assert data["reviewed_at"] is not None
         assert data["reviewed_by"] is not None
 
-    def test_reject_candidate(self, client, auth_headers, sample_candidate):
+    def test_reject_candidate(self, client, admin_auth_headers, sample_candidate):
         """Reject a candidate sets review metadata."""
         response = client.patch(
             f"/api/admin/candidates/{sample_candidate.id}",
             json={"status": "rejected", "review_notes": "Inaccurate dates"},
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -247,10 +252,93 @@ class TestCandidateEventCRUD:
         assert data["review_notes"] == "Inaccurate dates"
 
 
+class TestPromoteCandidate:
+    """Test candidate promotion to events."""
+
+    def test_promote_new_event(self, client, admin_auth_headers, sample_candidate):
+        """Promoting a candidate with no existing_event_id creates a new event."""
+        response = client.post(
+            f"/api/admin/candidates/{sample_candidate.id}/promote",
+            headers=admin_auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["title"] == "Battle of Antietam"
+        assert data["description"] == "Bloodiest single-day battle in American history"
+
+        # Verify the new event appears in public events
+        events_response = client.get("/api/events")
+        event_titles = [e["title"] for e in events_response.json()]
+        assert "Battle of Antietam" in event_titles
+
+        # Verify candidate status is now approved
+        candidate_response = client.get(
+            f"/api/admin/candidates/{sample_candidate.id}",
+            headers=admin_auth_headers,
+        )
+        assert candidate_response.json()["status"] == "approved"
+
+    def test_promote_as_update(self, client, admin_auth_headers, sample_topic, sample_event, db):
+        """Promoting a candidate with existing_event_id updates the existing event."""
+        from app.models import CandidateEvent, CandidateStatus
+
+        candidate = CandidateEvent(
+            id=uuid.uuid4(),
+            topic_id=sample_topic.id,
+            title="Battle of Gettysburg (Revised)",
+            description="Revised description of the major battle",
+            date_start=date(1863, 7, 1),
+            date_display="July 1-3, 1863",
+            date_precision="day",
+            existing_event_id=sample_event.id,
+            status=CandidateStatus.pending.value,
+        )
+        db.add(candidate)
+        db.commit()
+        db.refresh(candidate)
+
+        response = client.post(
+            f"/api/admin/candidates/{candidate.id}/promote",
+            headers=admin_auth_headers,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == str(sample_event.id)
+        assert data["title"] == "Battle of Gettysburg (Revised)"
+        assert data["description"] == "Revised description of the major battle"
+
+    def test_promote_already_approved(self, client, admin_auth_headers, sample_candidate, db):
+        """Promoting an already-approved candidate returns 400."""
+        sample_candidate.status = "approved"
+        db.commit()
+
+        response = client.post(
+            f"/api/admin/candidates/{sample_candidate.id}/promote",
+            headers=admin_auth_headers,
+        )
+        assert response.status_code == 400
+
+    def test_promote_not_found(self, client, admin_auth_headers):
+        """Promoting a non-existent candidate returns 404."""
+        response = client.post(
+            f"/api/admin/candidates/{uuid.uuid4()}/promote",
+            headers=admin_auth_headers,
+        )
+        assert response.status_code == 404
+
+    def test_promote_requires_admin(self, client, auth_headers, sample_candidate):
+        """Non-admin user cannot promote candidates."""
+        response = client.post(
+            f"/api/admin/candidates/{sample_candidate.id}/promote",
+            headers=auth_headers,
+        )
+        assert response.status_code == 403
+
+
 class TestCandidateBatchCreate:
     """Test bulk candidate creation."""
 
-    def test_batch_create(self, client, auth_headers, sample_topic, sample_harvest_batch):
+    def test_batch_create(self, client, admin_auth_headers, sample_topic, sample_harvest_batch):
         """Bulk create candidates with batch ID."""
         response = client.post(
             "/api/admin/candidates/batch",
@@ -273,7 +361,7 @@ class TestCandidateBatchCreate:
                     },
                 ],
             },
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 201
         data = response.json()
@@ -281,7 +369,7 @@ class TestCandidateBatchCreate:
         assert all(c["harvest_batch_id"] == str(sample_harvest_batch.id) for c in data)
 
         # Verify batch event_count was updated
-        batch_response = client.get("/api/admin/harvest-batches", headers=auth_headers)
+        batch_response = client.get("/api/admin/harvest-batches", headers=admin_auth_headers)
         batches = batch_response.json()
         batch = next(b for b in batches if b["id"] == str(sample_harvest_batch.id))
         assert batch["event_count"] == 2
@@ -290,7 +378,7 @@ class TestCandidateBatchCreate:
 class TestHarvestBatchCRUD:
     """Test harvest batch CRUD operations."""
 
-    def test_create_harvest_batch(self, client, auth_headers, sample_topic):
+    def test_create_harvest_batch(self, client, admin_auth_headers, sample_topic):
         """Create a new harvest batch."""
         response = client.post(
             "/api/admin/harvest-batches",
@@ -300,7 +388,7 @@ class TestHarvestBatchCRUD:
                 "strategy": "web_scrape",
                 "source_url": "https://en.wikipedia.org",
             },
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 201
         data = response.json()
@@ -308,42 +396,42 @@ class TestHarvestBatchCRUD:
         assert data["status"] == "running"
         assert data["event_count"] == 0
 
-    def test_list_harvest_batches(self, client, auth_headers, sample_harvest_batch):
+    def test_list_harvest_batches(self, client, admin_auth_headers, sample_harvest_batch):
         """List harvest batches."""
-        response = client.get("/api/admin/harvest-batches", headers=auth_headers)
+        response = client.get("/api/admin/harvest-batches", headers=admin_auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 1
 
-    def test_list_harvest_batches_filter_by_status(self, client, auth_headers, sample_harvest_batch):
+    def test_list_harvest_batches_filter_by_status(self, client, admin_auth_headers, sample_harvest_batch):
         """Filter harvest batches by status."""
         response = client.get(
             "/api/admin/harvest-batches?status=running",
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert len(data) >= 1
         assert all(b["status"] == "running" for b in data)
 
-    def test_update_harvest_batch_completed(self, client, auth_headers, sample_harvest_batch):
+    def test_update_harvest_batch_completed(self, client, admin_auth_headers, sample_harvest_batch):
         """Update batch to completed sets completed_at."""
         response = client.patch(
             f"/api/admin/harvest-batches/{sample_harvest_batch.id}",
             json={"status": "completed"},
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "completed"
         assert data["completed_at"] is not None
 
-    def test_update_harvest_batch_not_found(self, client, auth_headers):
+    def test_update_harvest_batch_not_found(self, client, admin_auth_headers):
         """Update non-existent batch returns 404."""
         response = client.patch(
             f"/api/admin/harvest-batches/{uuid.uuid4()}",
             json={"status": "completed"},
-            headers=auth_headers,
+            headers=admin_auth_headers,
         )
         assert response.status_code == 404
 

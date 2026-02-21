@@ -4,6 +4,7 @@ export interface User {
   email: string;
   display_name: string | null;
   is_pro: boolean;
+  is_admin: boolean;
   pro_purchased_at: string | null;
   created_at: string;
 }
@@ -129,4 +130,38 @@ export interface RegisterRequest {
 export interface TokenResponse {
   access_token: string;
   token_type: string;
+}
+
+// Candidate event types
+export interface CandidateEvent {
+  id: string;
+  topic_id: string;
+  title: string;
+  description: string;
+  date_start: string;
+  date_end: string | null;
+  date_display: string;
+  date_precision: string;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  significance: string | null;
+  source_url: string | null;
+  source_citation: string | null;
+  image_url: string | null;
+  existing_event_id: string | null;
+  status: string;
+  source_name: string | null;
+  harvest_batch_id: string | null;
+  confidence_score: number | null;
+  review_notes: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  created_at: string;
+  tags: Tag[];
+  standards: StandardBrief[];
+}
+
+export interface CandidateEventDetail extends CandidateEvent {
+  existing_event: Event | null;
 }
