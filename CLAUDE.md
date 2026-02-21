@@ -138,6 +138,5 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 
 ## git wotkflow
 
-Make all changes in fresh PRs.
 Don't mention claude in the PR descriptions
 
