@@ -91,6 +91,28 @@ aws lambda invoke --function-name lessonlines-dev-api \
   /tmp/migrate-out.json && cat /tmp/migrate-out.json
 ```
 
+### Admin Users
+
+**Local:** Use `scripts/make_admin.sh`:
+```bash
+./scripts/make_admin.sh user@example.com
+```
+
+**Production:** The Lambda handler supports a `make_admin` action:
+```bash
+# Create a new admin user
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action":"make_admin","email":"user@example.com","password":"securepassword"}' \
+  /tmp/admin-out.json && cat /tmp/admin-out.json
+
+# Promote an existing user to admin (no password needed)
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action":"make_admin","email":"existing@example.com"}' \
+  /tmp/admin-out.json && cat /tmp/admin-out.json
+```
+
 ### Deployment
 
 ```bash
