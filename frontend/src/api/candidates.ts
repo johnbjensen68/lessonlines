@@ -1,13 +1,19 @@
 import client from './client';
-import { CandidateEvent, CandidateEventDetail, Event } from '../types';
+import { CandidateEvent, CandidateEventDetail, Event, HarvestBatch } from '../types';
 
 interface CandidateListParams {
   status?: string;
   topic?: string;
   q?: string;
   has_existing_event?: boolean;
+  harvest_batch_id?: string;
   limit?: number;
   offset?: number;
+}
+
+export async function getHarvestBatches(): Promise<HarvestBatch[]> {
+  const response = await client.get<HarvestBatch[]>('/admin/harvest-batches');
+  return response.data;
 }
 
 export async function getCandidates(params: CandidateListParams = {}): Promise<CandidateEvent[]> {

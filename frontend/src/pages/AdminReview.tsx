@@ -1,42 +1,52 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCandidates, getCandidate, promoteCandidate, rejectCandidate } from '../api/candidates';
+import { getCandidates, getCandidate, getHarvestBatches, promoteCandidate, rejectCandidate } from '../api/candidates';
 import { getTopics } from '../api/events';
-import { CandidateEvent, CandidateEventDetail } from '../types';
+import { CandidateEvent, CandidateEventDetail, HarvestBatch } from '../types';
 import Header from '../components/layout/Header';
 
 type StatusFilter = 'pending' | 'approved' | 'rejected';
 
 export default function AdminReview() {
+  const [batches, setBatches] = useState<HarvestBatch[]>([]);
+  const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<CandidateEvent[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<CandidateEventDetail | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
-  const [loading, setLoading] = useState(true);
+  const [topicMap, setTopicMap] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectNotes, setRejectNotes] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
-  const [topicMap, setTopicMap] = useState<Record<string, string>>({});
 
+  // Load topics and batches on mount
   useEffect(() => {
     getTopics().then((topics) => {
       const map: Record<string, string> = {};
       topics.forEach((t) => { map[t.id] = t.name; });
       setTopicMap(map);
     });
+    getHarvestBatches().then((data) => {
+      setBatches(data);
+      if (data.length > 0) setSelectedBatchId(data[0].id);
+    });
   }, []);
 
+  const selectedBatch = batches.find((b) => b.id === selectedBatchId) ?? null;
+
   const fetchCandidates = useCallback(async () => {
+    if (!selectedBatchId) return;
     setLoading(true);
     try {
-      const data = await getCandidates({ status: statusFilter });
+      const data = await getCandidates({ status: statusFilter, harvest_batch_id: selectedBatchId });
       setCandidates(data);
     } catch (err) {
       console.error('Failed to fetch candidates:', err);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, selectedBatchId]);
 
   useEffect(() => {
     fetchCandidates();
@@ -45,10 +55,7 @@ export default function AdminReview() {
   }, [fetchCandidates]);
 
   useEffect(() => {
-    if (!selectedId) {
-      setDetail(null);
-      return;
-    }
+    if (!selectedId) { setDetail(null); return; }
     setDetailLoading(true);
     getCandidate(selectedId)
       .then(setDetail)
@@ -62,7 +69,6 @@ export default function AdminReview() {
     try {
       await promoteCandidate(selectedId);
       await fetchCandidates();
-      // Auto-select next pending candidate
       setSelectedId(null);
       setDetail(null);
     } catch (err) {
@@ -99,10 +105,53 @@ export default function AdminReview() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header />
       <div className="flex-1 flex overflow-hidden">
-        {/* Left panel - Candidate list */}
+
+        {/* Left panel */}
         <div className="w-96 border-r border-slate-200 bg-white flex flex-col">
+
+          {/* Batch selector */}
           <div className="p-4 border-b border-slate-200">
-            <h2 className="text-lg font-semibold text-slate-800 mb-3">Candidate Events</h2>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-2">
+              Batch
+            </label>
+            {batches.length === 0 ? (
+              <p className="text-sm text-slate-400">No batches found</p>
+            ) : (
+              <select
+                value={selectedBatchId ?? ''}
+                onChange={(e) => {
+                  setSelectedBatchId(e.target.value);
+                  setSelectedId(null);
+                  setDetail(null);
+                }}
+                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                {batches.map((batch) => (
+                  <option key={batch.id} value={batch.id}>
+                    {topicMap[batch.topic_id] ?? 'Unknown Topic'} — {batch.source_name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Selected batch topic callout */}
+            {selectedBatch && topicMap[selectedBatch.topic_id] && (
+              <div className="mt-3 px-3 py-2 bg-primary-50 rounded-md flex items-center gap-2">
+                <span className="text-xs font-semibold text-primary-700 uppercase tracking-wide">Topic</span>
+                <span className="text-sm font-medium text-primary-900">{topicMap[selectedBatch.topic_id]}</span>
+                <span className={`ml-auto text-xs px-1.5 py-0.5 rounded font-medium ${
+                  selectedBatch.status === 'completed' ? 'bg-green-100 text-green-700' :
+                  selectedBatch.status === 'running' ? 'bg-yellow-100 text-yellow-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {selectedBatch.status}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Status filter tabs */}
+          <div className="px-4 py-3 border-b border-slate-200">
             <div className="flex gap-1">
               {tabs.map((tab) => (
                 <button
@@ -120,6 +169,7 @@ export default function AdminReview() {
             </div>
           </div>
 
+          {/* Candidate list */}
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-12">
@@ -148,13 +198,11 @@ export default function AdminReview() {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className={`text-xs px-1.5 py-0.5 rounded font-medium ${
-                            candidate.existing_event_id
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}
-                        >
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                          candidate.existing_event_id
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
                           {candidate.existing_event_id ? 'Update' : 'New'}
                         </span>
                         {candidate.confidence_score !== null && (
@@ -163,13 +211,8 @@ export default function AdminReview() {
                           </span>
                         )}
                       </div>
-                      <h3 className="font-medium text-slate-800 text-sm truncate">
-                        {candidate.title}
-                      </h3>
+                      <h3 className="font-medium text-slate-800 text-sm truncate">{candidate.title}</h3>
                       <p className="text-xs text-slate-500 mt-0.5">{candidate.date_display}</p>
-                      {topicMap[candidate.topic_id] && (
-                        <p className="text-xs text-slate-400 mt-0.5">{topicMap[candidate.topic_id]}</p>
-                      )}
                     </div>
                   </div>
                 </button>
@@ -190,20 +233,13 @@ export default function AdminReview() {
             </div>
           ) : (
             <div className="p-6 max-w-4xl">
-              {/* Header */}
+              {/* Header badges */}
               <div className="flex items-center gap-3 mb-6">
-                {topicMap[detail.topic_id] && (
-                  <span className="text-sm px-2 py-1 rounded font-medium bg-slate-100 text-slate-700">
-                    {topicMap[detail.topic_id]}
-                  </span>
-                )}
-                <span
-                  className={`text-sm px-2 py-1 rounded font-medium ${
-                    detail.existing_event_id
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-green-100 text-green-700'
-                  }`}
-                >
+                <span className={`text-sm px-2 py-1 rounded font-medium ${
+                  detail.existing_event_id
+                    ? 'bg-amber-100 text-amber-700'
+                    : 'bg-green-100 text-green-700'
+                }`}>
                   {detail.existing_event_id ? 'Proposed Update' : 'New Event'}
                 </span>
                 <span className={`text-sm px-2 py-1 rounded font-medium ${
@@ -215,7 +251,6 @@ export default function AdminReview() {
                 </span>
               </div>
 
-              {/* Side-by-side comparison for updates */}
               {detail.existing_event ? (
                 <ComparisonView candidate={detail} existing={detail.existing_event} />
               ) : (
@@ -270,7 +305,6 @@ export default function AdminReview() {
                 </div>
               )}
 
-              {/* Review info for non-pending */}
               {detail.status !== 'pending' && detail.reviewed_at && (
                 <div className="mt-6 p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
                   <p>Reviewed: {new Date(detail.reviewed_at).toLocaleString()}</p>
@@ -289,11 +323,7 @@ function CandidateFields({ candidate }: { candidate: CandidateEventDetail }) {
   return (
     <div className="space-y-6">
       {candidate.image_url && (
-        <img
-          src={candidate.image_url}
-          alt={candidate.title}
-          className="w-full max-w-md rounded-lg"
-        />
+        <img src={candidate.image_url} alt={candidate.title} className="w-full max-w-md rounded-lg" />
       )}
       <div>
         <h1 className="text-2xl font-bold text-slate-800">{candidate.title}</h1>
@@ -310,9 +340,7 @@ function CandidateFields({ candidate }: { candidate: CandidateEventDetail }) {
           <span className="text-sm font-medium text-slate-600">Tags:</span>
           <div className="flex gap-1 mt-1">
             {candidate.tags.map((tag) => (
-              <span key={tag.id} className="px-2 py-0.5 bg-slate-100 rounded text-xs text-slate-600">
-                {tag.name}
-              </span>
+              <span key={tag.id} className="px-2 py-0.5 bg-slate-100 rounded text-xs text-slate-600">{tag.name}</span>
             ))}
           </div>
         </div>
@@ -322,9 +350,7 @@ function CandidateFields({ candidate }: { candidate: CandidateEventDetail }) {
           <span className="text-sm font-medium text-slate-600">Standards:</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {candidate.standards.map((s) => (
-              <span key={s.id} className="px-2 py-0.5 bg-blue-50 rounded text-xs text-blue-600">
-                {s.code}: {s.title}
-              </span>
+              <span key={s.id} className="px-2 py-0.5 bg-blue-50 rounded text-xs text-blue-600">{s.code}: {s.title}</span>
             ))}
           </div>
         </div>
@@ -363,11 +389,7 @@ function ComparisonView({ candidate, existing }: ComparisonViewProps) {
   return (
     <div className="space-y-4">
       {candidate.image_url && (
-        <img
-          src={candidate.image_url}
-          alt={candidate.title}
-          className="w-full max-w-md rounded-lg"
-        />
+        <img src={candidate.image_url} alt={candidate.title} className="w-full max-w-md rounded-lg" />
       )}
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div className="font-semibold text-slate-500 pb-2 border-b">Existing Event</div>

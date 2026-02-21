@@ -132,6 +132,19 @@ export interface TokenResponse {
   token_type: string;
 }
 
+// Harvest batch types
+export interface HarvestBatch {
+  id: string;
+  topic_id: string;
+  source_name: string;
+  source_url: string | null;
+  strategy: string;
+  event_count: number;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+}
+
 // Candidate event types
 export interface CandidateEvent {
   id: string;
