@@ -24,6 +24,16 @@ from .user import (
     UserResponse,
     Token,
 )
+from .candidate import (
+    HarvestBatchCreate,
+    HarvestBatchUpdate,
+    HarvestBatchResponse,
+    CandidateEventCreate,
+    CandidateEventUpdate,
+    CandidateEventResponse,
+    CandidateEventDetail,
+    CandidateBatchCreate,
+)
 
 __all__ = [
     "TopicResponse",
@@ -44,4 +54,12 @@ __all__ = [
     "UserLogin",
     "UserResponse",
     "Token",
+    "HarvestBatchCreate",
+    "HarvestBatchUpdate",
+    "HarvestBatchResponse",
+    "CandidateEventCreate",
+    "CandidateEventUpdate",
+    "CandidateEventResponse",
+    "CandidateEventDetail",
+    "CandidateBatchCreate",
 ]

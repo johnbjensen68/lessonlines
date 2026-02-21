@@ -10,9 +10,13 @@ from sqlalchemy.pool import StaticPool
 from app.database import Base, get_db
 from app.main import app
 from app.models import (
+    CandidateEvent,
+    CandidateStatus,
     CurriculumFramework,
     CurriculumStandard,
     Event,
+    HarvestBatch,
+    HarvestBatchStatus,
     Tag,
     Timeline,
     TimelineEvent,
@@ -229,3 +233,42 @@ def sample_timeline(db, test_user):
     db.commit()
     db.refresh(timeline)
     return timeline
+
+
+@pytest.fixture
+def sample_harvest_batch(db, sample_topic):
+    """Create and return a sample harvest batch."""
+    batch = HarvestBatch(
+        id=uuid.uuid4(),
+        topic_id=sample_topic.id,
+        source_name="Wikipedia",
+        source_url="https://en.wikipedia.org/wiki/Civil_War",
+        strategy="web_scrape",
+        status=HarvestBatchStatus.running.value,
+        event_count=0,
+    )
+    db.add(batch)
+    db.commit()
+    db.refresh(batch)
+    return batch
+
+
+@pytest.fixture
+def sample_candidate(db, sample_topic):
+    """Create and return a sample candidate event."""
+    candidate = CandidateEvent(
+        id=uuid.uuid4(),
+        topic_id=sample_topic.id,
+        title="Battle of Antietam",
+        description="Bloodiest single-day battle in American history",
+        date_start=date(1862, 9, 17),
+        date_display="September 17, 1862",
+        date_precision="day",
+        location="Sharpsburg, MD",
+        status=CandidateStatus.pending.value,
+        source_name="Wikipedia",
+    )
+    db.add(candidate)
+    db.commit()
+    db.refresh(candidate)
+    return candidate
