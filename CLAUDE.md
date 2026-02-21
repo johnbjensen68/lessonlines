@@ -48,17 +48,54 @@ npm run dev
 
 ### Database Migrations
 
+**Local (SQLite):**
 ```bash
+# Create a new migration
+cd backend
 alembic revision --autogenerate -m "description"
+
+# Apply locally
 alembic upgrade head
 alembic downgrade -1
+```
+
+Note: Local dev uses SQLite. When adding columns, you may need to delete `backend/lessonlines.db` and re-seed (`python -m app.seed`) since SQLite doesn't support all ALTER TABLE operations.
+
+**Production (RDS via Lambda):**
+
+The Lambda handler (`handler.py`) supports migration commands via direct invocation:
+
+```bash
+# Run all pending migrations
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action": "migrate", "command": "upgrade", "revision": "head"}' \
+  /tmp/migrate-out.json && cat /tmp/migrate-out.json
+
+# Check current migration version
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action": "migrate", "command": "current"}' \
+  /tmp/migrate-out.json && cat /tmp/migrate-out.json
+
+# Downgrade one revision
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action": "migrate", "command": "downgrade", "revision": "-1"}' \
+  /tmp/migrate-out.json && cat /tmp/migrate-out.json
+
+# Seed the database
+aws lambda invoke --function-name lessonlines-dev-api \
+  --cli-binary-format raw-in-base64-out \
+  --payload '{"action": "seed"}' \
+  /tmp/migrate-out.json && cat /tmp/migrate-out.json
 ```
 
 ### Deployment
 
 ```bash
-# Backend (SAM)
-cd backend && sam build && sam deploy --guided
+# Backend (CDK)
+cd infra && npx cdk deploy --all --require-approval never
 
 # Frontend auto-deploys via Amplify on push to main
 ```
