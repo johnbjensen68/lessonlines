@@ -2,10 +2,11 @@
 Lambda handler for LessonLines API.
 Uses Mangum to adapt FastAPI for AWS Lambda.
 
-Supports two modes:
+Supports multiple modes:
 - API requests: routed to FastAPI via Mangum (default)
 - Migrations: triggered with {"action": "migrate"} payload
 - Seed: triggered with {"action": "seed"} payload
+- Make admin: triggered with {"action": "make_admin", "email": "...", "password": "..."} payload
 """
 import json
 import os
@@ -123,6 +124,43 @@ def handler(event, context):
                 "statusCode": 500,
                 "body": {"success": False, "action": "seed", "error": str(e)},
             }
+
+    if isinstance(event, dict) and event.get("action") == "make_admin":
+        email = event.get("email")
+        password = event.get("password")
+        if not email:
+            return {"statusCode": 400, "body": {"success": False, "error": "email is required"}}
+
+        logger.info(f"Making admin user: {email}")
+        try:
+            from app.database import SessionLocal
+            from app.models import User
+            from app.services.auth import get_password_hash
+
+            db = SessionLocal()
+            try:
+                user = db.query(User).filter(User.email == email).first()
+                if user:
+                    user.is_admin = True
+                    action = "promoted"
+                elif password:
+                    user = User(
+                        email=email,
+                        hashed_password=get_password_hash(password),
+                        display_name="Admin",
+                        is_admin=True,
+                    )
+                    db.add(user)
+                    action = "created"
+                else:
+                    return {"statusCode": 400, "body": {"success": False, "error": "User not found; provide password to create"}}
+                db.commit()
+                return {"statusCode": 200, "body": {"success": True, "email": email, "action": action}}
+            finally:
+                db.close()
+        except Exception as e:
+            logger.exception("Make admin failed")
+            return {"statusCode": 500, "body": {"success": False, "error": str(e)}}
 
     # Default: route to FastAPI via Mangum
     return _api_handler(event, context)
