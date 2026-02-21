@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getCandidates, getCandidate, promoteCandidate, rejectCandidate } from '../api/candidates';
+import { getTopics } from '../api/events';
 import { CandidateEvent, CandidateEventDetail } from '../types';
 import Header from '../components/layout/Header';
 
@@ -15,6 +16,15 @@ export default function AdminReview() {
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectNotes, setRejectNotes] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [topicMap, setTopicMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    getTopics().then((topics) => {
+      const map: Record<string, string> = {};
+      topics.forEach((t) => { map[t.id] = t.name; });
+      setTopicMap(map);
+    });
+  }, []);
 
   const fetchCandidates = useCallback(async () => {
     setLoading(true);
@@ -157,8 +167,8 @@ export default function AdminReview() {
                         {candidate.title}
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">{candidate.date_display}</p>
-                      {candidate.source_name && (
-                        <p className="text-xs text-slate-400 mt-0.5">via {candidate.source_name}</p>
+                      {topicMap[candidate.topic_id] && (
+                        <p className="text-xs text-slate-400 mt-0.5">{topicMap[candidate.topic_id]}</p>
                       )}
                     </div>
                   </div>
@@ -182,6 +192,11 @@ export default function AdminReview() {
             <div className="p-6 max-w-4xl">
               {/* Header */}
               <div className="flex items-center gap-3 mb-6">
+                {topicMap[detail.topic_id] && (
+                  <span className="text-sm px-2 py-1 rounded font-medium bg-slate-100 text-slate-700">
+                    {topicMap[detail.topic_id]}
+                  </span>
+                )}
                 <span
                   className={`text-sm px-2 py-1 rounded font-medium ${
                     detail.existing_event_id
