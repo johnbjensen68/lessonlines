@@ -38,6 +38,7 @@ class EventListResponse(BaseModel):
     id: UUID
     title: str
     description: str
+    date_start: date
     date_display: str
     location: Optional[str] = None
     image_url: Optional[str] = None

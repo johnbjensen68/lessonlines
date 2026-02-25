@@ -37,6 +37,7 @@ def get_timeline_response(timeline: Timeline) -> dict:
                 "id": te.event.id,
                 "title": te.event.title,
                 "description": te.event.description,
+                "date_start": te.event.date_start,
                 "date_display": te.event.date_display,
                 "location": te.event.location,
                 "image_url": te.event.image_url,

@@ -18,7 +18,11 @@ export default function TimelineCanvas({
   onRemoveEvent,
 }: TimelineCanvasProps) {
   const colorScheme = COLOR_SCHEMES[timeline.color_scheme as keyof typeof COLOR_SCHEMES] || COLOR_SCHEMES.blue_green;
-  const sortedEvents = [...timeline.events].sort((a, b) => a.position - b.position);
+  const sortedEvents = [...timeline.events].sort((a, b) => {
+    const dateA = a.custom_date_start ?? a.event?.date_start ?? '';
+    const dateB = b.custom_date_start ?? b.event?.date_start ?? '';
+    return dateA < dateB ? -1 : dateA > dateB ? 1 : a.position - b.position;
+  });
 
   return (
     <div className="flex-1 p-6 overflow-auto">

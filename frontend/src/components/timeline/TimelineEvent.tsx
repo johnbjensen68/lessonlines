@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TimelineEvent as TimelineEventType } from '../../types';
+import EventDetailModal from './EventDetailModal';
 
 interface TimelineEventProps {
   event: TimelineEventType;
@@ -21,12 +22,9 @@ export default function TimelineEvent({
   onRemove,
 }: TimelineEventProps) {
   const {
-    attributes,
-    listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging,
   } = useSortable({ id: event.id });
 
   const style = {
@@ -34,7 +32,7 @@ export default function TimelineEvent({
     transition,
   };
 
-  const [descExpanded, setDescExpanded] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const title = event.custom_title || event.event?.title || 'Custom Event';
   const dateDisplay = event.custom_date_display || event.event?.date_display || '';
@@ -52,14 +50,13 @@ export default function TimelineEvent({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex flex-col items-center shrink-0 ${isDragging ? 'opacity-50' : ''}`}
+      className="flex flex-col items-center shrink-0"
     >
       {/* Event card */}
       <div
-        className="rounded w-[170px] px-3 py-2.5 relative group cursor-grab active:cursor-grabbing shadow-lg"
+        className="rounded w-[170px] px-3 py-2.5 relative group cursor-pointer shadow-lg"
         style={{ backgroundColor: cardColor }}
-        {...attributes}
-        {...listeners}
+        onClick={() => setModalOpen(true)}
       >
         <button
           onClick={(e) => {
@@ -80,20 +77,7 @@ export default function TimelineEvent({
         <div className="text-sm font-bold text-white leading-tight">{title}</div>
         <div className="text-xs mt-1 text-white/80">{dateDisplay}</div>
         {description && (
-          <div className="mt-1.5">
-            <div className={`text-xs text-white/70 leading-snug ${descExpanded ? '' : 'line-clamp-3'}`}>
-              {description}
-            </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setDescExpanded(!descExpanded);
-              }}
-              className="text-[10px] text-white/50 hover:text-white/80 mt-0.5 transition-colors"
-            >
-              {descExpanded ? 'Show less' : 'Show more'}
-            </button>
-          </div>
+          <div className="text-xs mt-1.5 text-white/70 leading-snug line-clamp-3">{description}</div>
         )}
       </div>
 
@@ -116,6 +100,10 @@ export default function TimelineEvent({
       <div className="mt-0.5 text-center w-[170px]">
         <span className="text-[11px] font-medium text-slate-300">{dateDisplay}</span>
       </div>
+
+      {modalOpen && (
+        <EventDetailModal event={event} onClose={() => setModalOpen(false)} />
+      )}
     </div>
   );
 }

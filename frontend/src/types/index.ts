@@ -45,6 +45,7 @@ export interface EventListItem {
   id: string;
   title: string;
   description: string;
+  date_start: string;
   date_display: string;
   location: string | null;
   image_url: string | null;
