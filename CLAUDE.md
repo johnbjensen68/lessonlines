@@ -162,3 +162,7 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 
 Don't mention claude in the PR descriptions
 
+## self improvement
+
+If you have problems getting a command to run look in AGENT-HINTS.md 
+If you have problems running a certain command, append it to the file AGENT-HINTS.md
