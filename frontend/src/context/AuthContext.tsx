@@ -1,6 +1,7 @@
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { jwtDecode } from './jwtDecode';
 import { login as apiLogin, register as apiRegister } from '../api/auth';
+import client from '../api/client';
 import { User, AuthState, RegisterRequest } from '../types';
 import { LOCAL_STORAGE_TOKEN_KEY } from '../utils/constants';
 
@@ -59,16 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const decoded = jwtDecode(token);
         if (decoded.exp && decoded.exp * 1000 > Date.now()) {
-          const user: User = {
-            id: decoded.sub,
-            email: '',
-            display_name: null,
-            is_pro: false,
-            is_admin: decoded.is_admin || false,
-            pro_purchased_at: null,
-            created_at: '',
-          };
-          dispatch({ type: 'LOGIN_SUCCESS', payload: { token, user } });
+          client.get<User>('/users/me').then((res) => {
+            dispatch({ type: 'LOGIN_SUCCESS', payload: { token, user: res.data } });
+          }).catch(() => {
+            localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+            dispatch({ type: 'LOGOUT' });
+          });
         } else {
           localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
           dispatch({ type: 'LOGOUT' });
@@ -87,17 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await apiLogin(email, password);
       localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, response.access_token);
-      const decoded = jwtDecode(response.access_token);
-      const user: User = {
-        id: decoded.sub,
-        email,
-        display_name: null,
-        is_pro: false,
-        is_admin: decoded.is_admin || false,
-        pro_purchased_at: null,
-        created_at: '',
-      };
-      dispatch({ type: 'LOGIN_SUCCESS', payload: { token: response.access_token, user } });
+      const userRes = await client.get<User>('/users/me');
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { token: response.access_token, user: userRes.data } });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed';
       dispatch({ type: 'LOGIN_ERROR', payload: message });

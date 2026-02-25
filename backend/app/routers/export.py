@@ -89,8 +89,15 @@ def generate_timeline_pdf(timeline: Timeline) -> io.BytesIO:
     else:
         story.append(Spacer(1, 12))
 
-    # Sort events by position
-    sorted_events = sorted(timeline.events, key=lambda e: e.position)
+    # Sort events chronologically, falling back to position
+    def sort_key(te):
+        if te.custom_date_start:
+            return str(te.custom_date_start)
+        if te.event and te.event.date_start:
+            return str(te.event.date_start)
+        return str(te.position)
+
+    sorted_events = sorted(timeline.events, key=sort_key)
 
     # Events
     for idx, te in enumerate(sorted_events):

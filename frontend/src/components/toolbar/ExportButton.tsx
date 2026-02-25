@@ -17,7 +17,13 @@ export default function ExportButton({ isPro, onExport }: ExportButtonProps) {
     try {
       const downloadUrl = await onExport();
       if (downloadUrl) {
-        window.open(downloadUrl, '_blank');
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'timeline.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
       }
     } catch (error) {
       console.error('Export failed:', error);
