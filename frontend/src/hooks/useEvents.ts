@@ -10,6 +10,7 @@ export function useEvents(options: UseEventsOptions = {}) {
   const [events, setEvents] = useState<EventListItem[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(options.initialTopic || null);
+  const [topicsLoaded, setTopicsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +20,8 @@ export function useEvents(options: UseEventsOptions = {}) {
   }, []);
 
   useEffect(() => {
-    loadEvents();
-  }, [selectedTopic, searchQuery]);
+    if (topicsLoaded) loadEvents();
+  }, [selectedTopic, searchQuery, topicsLoaded]);
 
   const loadTopics = async () => {
     try {
@@ -29,6 +30,7 @@ export function useEvents(options: UseEventsOptions = {}) {
       if (data.length > 0 && !selectedTopic) {
         setSelectedTopic(data[0].slug);
       }
+      setTopicsLoaded(true);
     } catch {
       setError('Failed to load topics');
     }
