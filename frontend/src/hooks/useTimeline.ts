@@ -83,6 +83,21 @@ export function useTimeline(timelineId: string) {
     debouncedSave(changes);
   }, [timeline, debouncedSave]);
 
+  const updateImmediate = useCallback(async (changes: TimelineUpdate) => {
+    if (!timeline) return;
+
+    // Cancel any pending debounced save
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Merge with any pending changes and apply optimistically
+    const merged = { ...pendingChangesRef.current, ...changes };
+    pendingChangesRef.current = null;
+    setTimeline({ ...timeline, ...merged });
+    await saveChanges(merged);
+  }, [timeline, saveChanges]);
+
   const addEvent = useCallback(async (data: TimelineEventCreate) => {
     if (!timeline) return;
 
@@ -131,6 +146,7 @@ export function useTimeline(timelineId: string) {
     isSaving,
     error,
     update,
+    updateImmediate,
     addEvent,
     removeEvent,
     reorderEvents,

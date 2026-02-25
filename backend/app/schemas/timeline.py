@@ -48,11 +48,28 @@ class TimelineUpdate(BaseModel):
     color_scheme: Optional[str] = None
     layout: Optional[str] = None
     font: Optional[str] = None
+    is_public: Optional[bool] = None
 
 
 class TimelineResponse(BaseModel):
     id: UUID
     user_id: UUID
+    title: str
+    subtitle: Optional[str] = None
+    color_scheme: str
+    layout: str
+    font: str
+    is_public: bool
+    created_at: datetime
+    updated_at: datetime
+    events: list[TimelineEventResponse] = []
+
+    class Config:
+        from_attributes = True
+
+
+class PublicTimelineResponse(BaseModel):
+    id: UUID
     title: str
     subtitle: Optional[str] = None
     color_scheme: str

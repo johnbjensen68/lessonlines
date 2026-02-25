@@ -139,6 +139,8 @@ def update_timeline(
         timeline.layout = data.layout
     if data.font is not None:
         timeline.font = data.font
+    if data.is_public is not None:
+        timeline.is_public = data.is_public
 
     db.commit()
     db.refresh(timeline)

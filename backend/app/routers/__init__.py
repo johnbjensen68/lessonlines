@@ -5,6 +5,7 @@ from .auth import router as auth_router
 from .users import router as users_router
 from .export import router as export_router
 from .candidates import router as candidates_router
+from .public_timelines import router as public_timelines_router
 
 __all__ = [
     "events_router",
@@ -14,4 +15,5 @@ __all__ = [
     "users_router",
     "export_router",
     "candidates_router",
+    "public_timelines_router",
 ]

@@ -106,6 +106,7 @@ export interface TimelineUpdate {
   color_scheme?: string;
   layout?: string;
   font?: string;
+  is_public?: boolean;
 }
 
 export interface TimelineEventCreate {

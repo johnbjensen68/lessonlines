@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -28,10 +29,23 @@ export default function Editor() {
     isSaving,
     error,
     update,
+    updateImmediate,
     addEvent,
     removeEvent,
     reorderEvents,
   } = useTimeline(id!);
+
+  const [isPublishToggling, setIsPublishToggling] = useState(false);
+
+  const handlePublishToggle = async () => {
+    if (!timeline) return;
+    setIsPublishToggling(true);
+    try {
+      await updateImmediate({ is_public: !timeline.is_public });
+    } finally {
+      setIsPublishToggling(false);
+    }
+  };
 
   const handleExport = async (): Promise<string | null> => {
     if (!timeline) return null;
@@ -101,9 +115,13 @@ export default function Editor() {
         colorScheme={timeline.color_scheme}
         layout={timeline.layout}
         isPro={user?.is_pro || false}
+        isPublic={timeline.is_public}
+        timelineId={timeline.id}
         onColorChange={(color_scheme) => update({ color_scheme })}
         onLayoutChange={(layout) => update({ layout })}
         onExport={handleExport}
+        onPublishToggle={handlePublishToggle}
+        isPublishToggling={isPublishToggling}
       />
       <div className="flex items-center gap-2 px-4 py-1 bg-slate-50 border-b border-slate-200">
         {isSaving && (

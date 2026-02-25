@@ -1,4 +1,5 @@
 import client from './client';
+import publicClient from './publicClient';
 import { Timeline, TimelineCreate, TimelineUpdate, TimelineEventCreate } from '../types';
 
 export async function getTimelines(): Promise<Timeline[]> {
@@ -48,6 +49,11 @@ export async function reorderTimelineEvents(
   const response = await client.put<Timeline>(`/timelines/${timelineId}/events/reorder`, {
     positions,
   });
+  return response.data;
+}
+
+export async function getPublicTimeline(id: string): Promise<Timeline> {
+  const response = await publicClient.get<Timeline>(`/public/timelines/${id}`);
   return response.data;
 }
 

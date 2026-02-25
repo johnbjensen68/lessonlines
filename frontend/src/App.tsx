@@ -8,6 +8,7 @@ import Editor from './pages/Editor';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
 import AdminReview from './pages/AdminReview';
+import PublicTimeline from './pages/PublicTimeline';
 
 function App() {
   const { isLoading } = useAuth();
@@ -49,6 +50,7 @@ function App() {
           </AdminRoute>
         }
       />
+      <Route path="/t/:id" element={<PublicTimeline />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

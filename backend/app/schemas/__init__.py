@@ -16,6 +16,7 @@ from .timeline import (
     TimelineCreate,
     TimelineUpdate,
     TimelineResponse,
+    PublicTimelineResponse,
     ReorderRequest,
 )
 from .user import (
@@ -49,6 +50,7 @@ __all__ = [
     "TimelineCreate",
     "TimelineUpdate",
     "TimelineResponse",
+    "PublicTimelineResponse",
     "ReorderRequest",
     "UserCreate",
     "UserLogin",

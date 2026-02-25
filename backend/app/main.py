@@ -10,6 +10,7 @@ from .routers import (
     users_router,
     export_router,
     candidates_router,
+    public_timelines_router,
 )
 
 app = FastAPI(
@@ -43,6 +44,7 @@ app.include_router(standards_router)
 app.include_router(timelines_router)
 app.include_router(export_router)
 app.include_router(candidates_router)
+app.include_router(public_timelines_router)
 
 
 @app.get("/")
