@@ -19,7 +19,7 @@ export default function EventCard({ event, onAdd }: EventCardProps) {
         <div className="flex-1 min-w-0">
           <div className="text-xs font-semibold text-primary-500 mb-1">{event.date_display}</div>
           <div className="text-sm font-medium text-slate-800 mb-1">{event.title}</div>
-          <div className="text-xs text-slate-500 line-clamp-2">{event.description}</div>
+          <div className="text-xs text-slate-500">{event.description}</div>
         </div>
         {onAdd && (
           <button

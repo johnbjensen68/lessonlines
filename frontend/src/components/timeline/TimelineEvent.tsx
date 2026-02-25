@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TimelineEvent as TimelineEventType } from '../../types';
@@ -33,9 +34,12 @@ export default function TimelineEvent({
     transition,
   };
 
+  const [descExpanded, setDescExpanded] = useState(false);
+
   const title = event.custom_title || event.event?.title || 'Custom Event';
   const dateDisplay = event.custom_date_display || event.event?.date_display || '';
   const imageUrl = event.event?.image_url || null;
+  const description = event.event?.description || null;
 
   // Alternate between primary and secondary colors like the reference
   const cardColor = index % 2 === 0 ? colorPrimary : colorSecondary;
@@ -75,6 +79,22 @@ export default function TimelineEvent({
         )}
         <div className="text-sm font-bold text-white leading-tight">{title}</div>
         <div className="text-xs mt-1 text-white/80">{dateDisplay}</div>
+        {description && (
+          <div className="mt-1.5">
+            <div className={`text-xs text-white/70 leading-snug ${descExpanded ? '' : 'line-clamp-3'}`}>
+              {description}
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDescExpanded(!descExpanded);
+              }}
+              className="text-[10px] text-white/50 hover:text-white/80 mt-0.5 transition-colors"
+            >
+              {descExpanded ? 'Show less' : 'Show more'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Connector line */}
