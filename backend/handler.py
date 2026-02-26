@@ -125,6 +125,31 @@ def handler(event, context):
                 "body": {"success": False, "action": "seed", "error": str(e)},
             }
 
+    if isinstance(event, dict) and event.get("action") == "import_events":
+        logger.info("Running event import from JSON files")
+        try:
+            from pathlib import Path
+            from app.database import SessionLocal
+            from app.services.import_events import import_all_event_files
+
+            data_dir = Path(__file__).parent.parent / "event-data"
+            db = SessionLocal()
+            try:
+                results = import_all_event_files(db, data_dir)
+                db.commit()
+                return {
+                    "statusCode": 200,
+                    "body": {"success": True, "results": results},
+                }
+            finally:
+                db.close()
+        except Exception as e:
+            logger.exception("Event import failed")
+            return {
+                "statusCode": 500,
+                "body": {"success": False, "error": str(e)},
+            }
+
     if isinstance(event, dict) and event.get("action") == "make_admin":
         email = event.get("email")
         password = event.get("password")
