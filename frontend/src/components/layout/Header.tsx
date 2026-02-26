@@ -32,7 +32,7 @@ export default function Header({ showNewTimeline = false, onNewTimeline }: Heade
 
       <div className="flex items-center gap-3">
         {user?.is_admin && (
-          <Link to="/admin/review">
+          <Link to="/admin">
             <Button variant="secondary" size="sm">
               Admin
             </Button>

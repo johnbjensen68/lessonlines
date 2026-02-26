@@ -1,7 +1,7 @@
 """Add is_admin to users
 
 Revision ID: 003_add_is_admin
-Revises: 002_candidate_events
+Revises: 001_initial
 Create Date: 2026-02-21
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = '003_add_is_admin'
-down_revision: Union[str, None] = '002_candidate_events'
+down_revision: Union[str, None] = '001_initial'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

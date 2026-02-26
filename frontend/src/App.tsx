@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Editor from './pages/Editor';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminRoute from './components/auth/AdminRoute';
-import AdminReview from './pages/AdminReview';
+import Admin from './pages/Admin';
 import PublicTimeline from './pages/PublicTimeline';
 
 function App() {
@@ -43,10 +43,10 @@ function App() {
         }
       />
       <Route
-        path="/admin/review"
+        path="/admin"
         element={
           <AdminRoute>
-            <AdminReview />
+            <Admin />
           </AdminRoute>
         }
       />
