@@ -45,7 +45,7 @@ export class BackendStack extends cdk.Stack {
             'bash', '-c',
             [
               'pip install -r requirements-lambda.txt -t /asset-output',
-              'cp -r app alembic handler.py /asset-output/',
+              'cp -r app alembic handler.py event-data /asset-output/',
               // Strip unnecessary files to reduce package size
               'find /asset-output -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null',
               'find /asset-output -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null',

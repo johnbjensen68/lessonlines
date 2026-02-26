@@ -132,7 +132,7 @@ def handler(event, context):
             from app.database import SessionLocal
             from app.services.import_events import import_all_event_files
 
-            data_dir = Path(__file__).parent.parent / "event-data"
+            data_dir = Path(__file__).parent / "event-data"
             db = SessionLocal()
             try:
                 results = import_all_event_files(db, data_dir)

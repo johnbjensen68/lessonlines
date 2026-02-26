@@ -13,7 +13,7 @@ from .models import (
 )
 from .services.import_events import import_all_event_files
 
-EVENT_DATA_DIR = Path(__file__).parent.parent.parent / "event-data"
+EVENT_DATA_DIR = Path(__file__).parent.parent / "event-data"
 
 
 def seed_tags(db: Session) -> None:
