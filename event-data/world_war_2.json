@@ -1,0 +1,142 @@
+{
+  "topic": {
+    "slug": "world_war_2",
+    "name": "World War II",
+    "description": "Major events of World War II from 1939-1945, focusing on American involvement."
+  },
+  "events": [
+    {
+      "id": "evt_germany_invades_poland",
+      "title": "Germany Invades Poland",
+      "description": "Nazi Germany invaded Poland, beginning World War II in Europe. Britain and France declared war on Germany two days later.",
+      "date_start": "1939-09-01",
+      "date_display": "September 1, 1939",
+      "date_precision": "day",
+      "location": "Poland",
+      "significance": "The invasion triggered the start of World War II and demonstrated the effectiveness of German blitzkrieg tactics.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Battle_of_Poland.png/300px-Battle_of_Poland.png",
+      "tags": ["military", "battle"],
+      "standards": ["AP.USH.7.1", "TEKS.US.7.A"]
+    },
+    {
+      "id": "evt_pearl_harbor",
+      "title": "Attack on Pearl Harbor",
+      "description": "Japan launched a surprise military strike on the U.S. naval base at Pearl Harbor, Hawaii, killing over 2,400 Americans and destroying much of the Pacific Fleet.",
+      "date_start": "1941-12-07",
+      "date_display": "December 7, 1941",
+      "date_precision": "day",
+      "location": "Pearl Harbor, Hawaii",
+      "significance": "The attack brought the United States into World War II and unified American public opinion for war.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Attack_on_Pearl_Harbor_Japanese_planes_view.jpg/300px-Attack_on_Pearl_Harbor_Japanese_planes_view.jpg",
+      "tags": ["military", "battle"],
+      "standards": ["CCSS.ELA-LITERACY.RH.9-10.3", "AP.USH.7.1", "TEKS.US.7.A"]
+    },
+    {
+      "id": "evt_us_declares_war",
+      "title": "U.S. Declares War",
+      "description": "Following President Roosevelt's 'Day of Infamy' speech, Congress declared war on Japan. Germany and Italy then declared war on the United States.",
+      "date_start": "1941-12-08",
+      "date_display": "December 8, 1941",
+      "date_precision": "day",
+      "location": "Washington, D.C.",
+      "significance": "American entry into the war transformed the conflict into a truly global war and ultimately tipped the balance toward Allied victory.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/FDR_addressing_Congress_on_the_Declaration_of_War%2C_December_8%2C_1941.jpg/300px-FDR_addressing_Congress_on_the_Declaration_of_War%2C_December_8%2C_1941.jpg",
+      "tags": ["political", "declaration"],
+      "standards": ["CCSS.ELA-LITERACY.RH.6-8.2", "AP.USH.7.1", "TEKS.US.7.A"]
+    },
+    {
+      "id": "evt_battle_of_midway",
+      "title": "Battle of Midway",
+      "description": "U.S. Navy forces defeated a Japanese attack on Midway Atoll, sinking four Japanese aircraft carriers and turning the tide in the Pacific War.",
+      "date_start": "1942-06-04",
+      "date_end": "1942-06-07",
+      "date_display": "June 4-7, 1942",
+      "date_precision": "day",
+      "location": "Midway Atoll, Pacific Ocean",
+      "significance": "The victory at Midway ended Japanese naval superiority and put the U.S. on the offensive in the Pacific.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/USS_Yorktown_%28CV-5%29_is_hit_by_a_torpedo_on_4_June_1942.jpg/300px-USS_Yorktown_%28CV-5%29_is_hit_by_a_torpedo_on_4_June_1942.jpg",
+      "tags": ["military", "battle"],
+      "standards": ["AP.USH.7.1"]
+    },
+    {
+      "id": "evt_d_day",
+      "title": "D-Day Invasion",
+      "description": "Allied forces launched the largest amphibious invasion in history on the beaches of Normandy, France, beginning the liberation of Western Europe.",
+      "date_start": "1944-06-06",
+      "date_display": "June 6, 1944",
+      "date_precision": "day",
+      "location": "Normandy, France",
+      "significance": "D-Day opened a second front in Europe and began the final push to defeat Nazi Germany.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Into_the_Jaws_of_Death_23-0455M_edit.jpg/300px-Into_the_Jaws_of_Death_23-0455M_edit.jpg",
+      "tags": ["military", "battle"],
+      "standards": ["CCSS.ELA-LITERACY.RH.9-10.3", "AP.USH.7.1", "TEKS.US.7.A"]
+    },
+    {
+      "id": "evt_battle_of_the_bulge",
+      "title": "Battle of the Bulge",
+      "description": "Germany launched a major surprise offensive through the Ardennes forest, creating a 'bulge' in Allied lines before being pushed back.",
+      "date_start": "1944-12-16",
+      "date_end": "1945-01-25",
+      "date_display": "December 16, 1944 - January 25, 1945",
+      "date_precision": "day",
+      "location": "Ardennes, Belgium/Luxembourg",
+      "significance": "The failed German offensive depleted Nazi resources and hastened the end of the war in Europe.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/117th_Infantry_North_Carolina_NG_at_St._Vith_1945.jpg/300px-117th_Infantry_North_Carolina_NG_at_St._Vith_1945.jpg",
+      "tags": ["military", "battle"],
+      "standards": ["AP.USH.7.1"]
+    },
+    {
+      "id": "evt_iwo_jima",
+      "title": "Iwo Jima",
+      "description": "U.S. Marines captured the strategic island of Iwo Jima after intense fighting. The iconic flag-raising on Mount Suribachi became a symbol of American sacrifice.",
+      "date_start": "1945-02-19",
+      "date_end": "1945-03-26",
+      "date_display": "February 19 - March 26, 1945",
+      "date_precision": "day",
+      "location": "Iwo Jima, Japan",
+      "significance": "The capture of Iwo Jima provided a base for fighter escorts and emergency landings for B-29 bombers attacking Japan.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Raising_the_Flag_on_Iwo_Jima%2C_larger_-_edit1.jpg/300px-Raising_the_Flag_on_Iwo_Jima%2C_larger_-_edit1.jpg",
+      "tags": ["military", "battle"],
+      "standards": ["AP.USH.7.1"]
+    },
+    {
+      "id": "evt_ve_day",
+      "title": "Germany Surrenders (V-E Day)",
+      "description": "Nazi Germany surrendered unconditionally to the Allied forces, ending World War II in Europe.",
+      "date_start": "1945-05-08",
+      "date_display": "May 8, 1945",
+      "date_precision": "day",
+      "location": "Berlin, Germany",
+      "significance": "V-E Day marked the end of the Nazi regime and allowed the Allies to focus resources on defeating Japan.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/German_Instrument_of_Surrender_%28May_8%2C_1945%29_-_page_3.jpg/300px-German_Instrument_of_Surrender_%28May_8%2C_1945%29_-_page_3.jpg",
+      "tags": ["military", "political", "treaty"],
+      "standards": ["CCSS.ELA-LITERACY.RH.11-12.7", "AP.USH.7.1"]
+    },
+    {
+      "id": "evt_hiroshima",
+      "title": "Atomic Bomb Dropped on Hiroshima",
+      "description": "The United States dropped an atomic bomb on Hiroshima, Japan, killing approximately 80,000 people instantly and many more from radiation.",
+      "date_start": "1945-08-06",
+      "date_display": "August 6, 1945",
+      "date_precision": "day",
+      "location": "Hiroshima, Japan",
+      "significance": "The first use of nuclear weapons in warfare demonstrated their devastating power and hastened Japan's surrender.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Atomic_bombing_of_Japan.jpg/300px-Atomic_bombing_of_Japan.jpg",
+      "tags": ["military"],
+      "standards": ["CCSS.ELA-LITERACY.RH.6-8.2", "AP.USH.7.1", "TEKS.US.7.A"]
+    },
+    {
+      "id": "evt_vj_day",
+      "title": "Japan Surrenders (V-J Day)",
+      "description": "Japan announced its surrender following the atomic bombings of Hiroshima and Nagasaki, ending World War II.",
+      "date_start": "1945-08-15",
+      "date_display": "August 15, 1945",
+      "date_precision": "day",
+      "location": "Tokyo, Japan",
+      "significance": "Japan's surrender ended World War II and began the American occupation and reconstruction of Japan.",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Surrender_of_Japan_-_USS_Missouri_%28restored%29.jpg/300px-Surrender_of_Japan_-_USS_Missouri_%28restored%29.jpg",
+      "tags": ["military", "political", "treaty"],
+      "standards": ["CCSS.ELA-LITERACY.RH.11-12.7", "AP.USH.7.1", "TEKS.US.7.A"]
+    }
+  ]
+}

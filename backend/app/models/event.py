@@ -12,6 +12,7 @@ class Event(Base):
     __tablename__ = "events"
 
     id = Column(UUID(), primary_key=True, default=uuid.uuid4)
+    source_id = Column(String(100), unique=True, nullable=True, index=True)
     topic_id = Column(UUID(), ForeignKey("topics.id"), nullable=False)
     title = Column(String(500), nullable=False)
     description = Column(Text, nullable=False)

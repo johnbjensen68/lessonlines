@@ -147,7 +147,7 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 
 ## Git Conventions
 
-- Do not include mentions of Claude or AI in commit messages
+- IMPORTANT: Do not include mentions of Claude or AI in commit messages
 - Use conventional commit style (e.g., "Add user authentication", "Fix bcrypt compatibility")
 
 ## Important Implementation Notes
