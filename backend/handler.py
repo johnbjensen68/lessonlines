@@ -125,6 +125,48 @@ def handler(event, context):
                 "body": {"success": False, "action": "seed", "error": str(e)},
             }
 
+    if isinstance(event, dict) and event.get("action") == "deduplicate_events":
+        logger.info("Deduplicating events: removing source_id=NULL events that have a source_id counterpart")
+        try:
+            from app.database import SessionLocal
+            from app.models import Event, TimelineEvent
+            from sqlalchemy import text
+
+            db = SessionLocal()
+            try:
+                # Find all events without source_id that share a title+topic with a source_id event
+                old_events = db.query(Event).filter(Event.source_id == None).all()
+                deleted = 0
+                reassigned = 0
+
+                for old in old_events:
+                    # Find the canonical replacement (same title + topic, has source_id)
+                    new = db.query(Event).filter(
+                        Event.source_id != None,
+                        Event.title == old.title,
+                        Event.topic_id == old.topic_id,
+                    ).first()
+
+                    if new:
+                        # Reassign any timeline_events pointing to the old event
+                        count = db.query(TimelineEvent).filter(TimelineEvent.event_id == old.id).update(
+                            {"event_id": new.id}
+                        )
+                        reassigned += count
+                        db.delete(old)
+                        deleted += 1
+
+                db.commit()
+                return {
+                    "statusCode": 200,
+                    "body": {"success": True, "deleted": deleted, "timeline_events_reassigned": reassigned},
+                }
+            finally:
+                db.close()
+        except Exception as e:
+            logger.exception("Deduplication failed")
+            return {"statusCode": 500, "body": {"success": False, "error": str(e)}}
+
     if isinstance(event, dict) and event.get("action") == "import_events":
         logger.info("Running event import from JSON files")
         try:

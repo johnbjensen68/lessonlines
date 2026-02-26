@@ -161,6 +161,7 @@ Uses React Context + useReducer for timeline editor state. Key hooks:
 ## git wotkflow
 
 Don't mention claude in the PR descriptions
+IMPORTANT: Don't commit or push unless explicitly instructed
 
 ## self improvement
 
